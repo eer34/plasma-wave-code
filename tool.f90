@@ -17,7 +17,7 @@
 contains
 
 !-----------------------------------------------------------------------------!
-!     ���Ժ���1
+!     test_function_1
 !-----------------------------------------------------------------------------!
     complex(wp) function test_fun(x)
 	implicit none
@@ -32,7 +32,7 @@ contains
     end function test_fun  
     
 !-----------------------------------------------------------------------------!
-!     ���Ժ���2
+!     test_function_2
 !-----------------------------------------------------------------------------!    
       complex(wp) function test_fun2(x)
         implicit none
@@ -59,7 +59,7 @@ contains
         !test_fun2=log(test_fun2)
     end function test_fun2
 !-----------------------------------------------------------------------------!
-!     ���Ժ���3
+!     test_function_3_plasma_dispersion_function
 !-----------------------------------------------------------------------------!       
     complex(wp) function test_fun3(x)
 	implicit none
@@ -68,7 +68,7 @@ contains
     !test_fun3=log(test_fun3)
     end function test_fun3
 !-----------------------------------------------------------------------------!
-!     set_parameter:��������ɫɢ�����������ٲ���
+!     set_parameter: given k to calculate omega
 !-----------------------------------------------------------------------------!    
     subroutine set_parameter(b,n,ti_para,ti_per,te_para,te_per,k_para,k_per)
     implicit none
@@ -108,7 +108,7 @@ contains
     end subroutine set_parameter
     
 !-----------------------------------------------------------------------------!
-!     set_parameter_variable_k_para:����������k_paraΪ�����Ķ���ѧɫɢ��ϵ�������ٲ���
+!     set_parameter_variable_k_para:given omega k_perp to calculate k_para
 !-----------------------------------------------------------------------------!    
     subroutine set_parameter_variable_k_para(c_div_v_para_input,omega_pe_div_omega_ce_input,omega_div_omega_ci_input,k_per_rho_i_input)
     implicit none
@@ -128,7 +128,7 @@ contains
     end subroutine set_parameter_variable_k_para
     
 !-----------------------------------------------------------------------------!
-!     set_parameter_variable_k_per:����������k_perΪ�����Ķ���ѧɫɢ��ϵ�������ٲ���
+!     set_parameter_variable_k_per:given omega and k_para to calculate k_perp
 !-----------------------------------------------------------------------------!    
     subroutine set_parameter_variable_k_per(c_div_v_para_input,omega_pe_div_omega_ce_input,omega_div_omega_ci_input,k_para_rho_i_input)
     implicit none
@@ -147,7 +147,7 @@ contains
     
 
 !-----------------------------------------------------------------------------!
-!     set_parameter_cold_variable_k_per:����������k_perΪ���������������ɫɢ��ϵ�������ٲ���
+!     set_parameter_cold_variable_k_per:cold plasma dispersion relation, given n_para and omega to calculate n_perp
 !-----------------------------------------------------------------------------!    
     subroutine set_parameter_cold_variable_k_per(omega_pe_div_omega_ce_input,omega_div_omega_ci_input,refractive_para_input)
     implicit none
@@ -164,7 +164,7 @@ contains
     
     
 !-----------------------------------------------------------------------------!
-!     set_parameter2:ר������ڵ���bernsetin ���������ٲ������ú���
+!     set_parameter2:given k_perp to calculate omega for perpendicular wave
 !-----------------------------------------------------------------------------! 
     subroutine set_parameter2(omega_pe_div_omega_ce_sqrt,k_per_rho_e_per_input)
     implicit none
@@ -176,7 +176,7 @@ contains
     end subroutine set_parameter2
 
 !-----------------------------------------------------------------------------!
-!     set_parameter_special:ר������ڼ���ƽ���ڴų������Ĳ��������ٲ������ú���
+!     set_parameter_special:given k to calculate omega. The density input is replaced by omega_pe_div_omega_ce_input
 !-----------------------------------------------------------------------------!
     
     subroutine set_parameter_special(b,ti_para,ti_per,te_para,te_per,k_para,k_per,omega_pe_div_omega_ce_input)
@@ -214,7 +214,7 @@ contains
     omega_pi_div_omega_ci=omega_pe_div_omega_ce*1836
     end subroutine set_parameter_special
 !-----------------------------------------------------------------------------!
-!     dispersion_function_parallel_matrix:����ƽ���ڴų�������ɫɢ����ϵ��
+!     dispersion_function_parallel_matrix: dispersion matrix of omega for parallel waves
 !-----------------------------------------------------------------------------!
     subroutine dispersion_function_parallel_matrix(x,D)
     implicit none
@@ -258,7 +258,7 @@ contains
     end subroutine dispersion_function_parallel_matrix
 
 !-----------------------------------------------------------------------------!
-!     dispersion_function_parallel_matrix_variable_k_para:�������Ϊk_paraʱƽ���ڴų�������ɫɢ����ϵ��
+!     dispersion_function_parallel_matrix_variable_k_para: the dispersion matrix of k_para with known omega for parallel waves.
 !-----------------------------------------------------------------------------!
     subroutine dispersion_function_parallel_matrix_variable_k_para(x,D)
     implicit none
@@ -302,7 +302,7 @@ contains
     end subroutine dispersion_function_parallel_matrix_variable_k_para
     
 !-----------------------------------------------------------------------------!
-!     dispersion_function_matrix:���㴹ֱ������б�������ε�ɫɢ����ϵ��
+!     dispersion_function_matrix:the dispersion matrix for omega with known k.
 !-----------------------------------------------------------------------------!
     subroutine dispersion_function_matrix(x,D)
     implicit none
@@ -719,7 +719,7 @@ contains
     
     
 !-----------------------------------------------------------------------------!
-!     dispersion_function_matrix_variable_k_para:����k_paraΪ����ʱ��ֱ������б�������ε�ɫɢ����ϵ��
+!     dispersion_function_matrix_variable_k_para:dispersion matrix for k_para with known k_perp and omega
 !-----------------------------------------------------------------------------!
     subroutine dispersion_function_matrix_variable_k_para(x,D)
     implicit none
@@ -968,7 +968,7 @@ contains
     end subroutine dispersion_function_matrix_variable_k_para    
 
 !-----------------------------------------------------------------------------!
-!     dispersion_function_matrix_k_per:������k_perΪ����ʱ��ֱ������б�������ε�ɫɢ����ϵ��
+!     dispersion_function_matrix_k_per:dipsersion matrix for k_perp with given omega and k_para
 !-----------------------------------------------------------------------------!
     subroutine dispersion_function_matrix_variable_k_per(x,D)
     implicit none
@@ -1283,7 +1283,7 @@ contains
     
     
 !-----------------------------------------------------------------------------!
-!     electron_dispersion_function_matrix_k_per:������ӻ���Ƶ��Ƶ����k_perΪ����ʱ��ֱ������б�������ε�ɫɢ����ϵ��
+!     electron_dispersion_function_matrix_k_per:the dispersion relation for k_perp only considering electron 
 !-----------------------------------------------------------------------------!
     subroutine electron_dispersion_function_matrix_variable_k_per(x,D)
     implicit none
@@ -1516,7 +1516,7 @@ contains
     end subroutine electron_dispersion_function_matrix_variable_k_per
     
 !-----------------------------------------------------------------------------!
-!     electron_bernstein_wave:����bernstein��ɫɢ��ϵ
+!     electron_bernstein_wave: the dispersion relation of electron bernstein waves.
 !-----------------------------------------------------------------------------!
     complex(wp) function electron_bernstein_wave(x)
 	implicit none
@@ -1549,7 +1549,7 @@ contains
     end function electron_bernstein_wave
     
 !-----------------------------------------------------------------------------!
-!     dispersion_function_parallel_1:����������ɫɢ��ϵ
+!     dispersion_function_parallel_1: the dispersion relation of left hand wave with omega as the varable.
 !-----------------------------------------------------------------------------!
     complex(wp) function dispersion_function_parallel_1(x)
 	implicit none
@@ -1562,7 +1562,7 @@ contains
     end function dispersion_function_parallel_1
        
 !-----------------------------------------------------------------------------!
-!     dispersion_function_parallel_2:����������ɫɢ��ϵ
+!     dispersion_function_parallel_2: the dispersion relation of right hand wave with omega as the varable.
 !-----------------------------------------------------------------------------! 
     complex(wp) function dispersion_function_parallel_2(x)
 	implicit none
@@ -1575,7 +1575,7 @@ contains
     end function dispersion_function_parallel_2
     
 !-----------------------------------------------------------------------------!
-!     dispersion_function_parallel_3:��������������Langmuir��ɫɢ��ϵ
+!     dispersion_function_parallel_3:the dispersion relation of langmuir wave and ion acoustic wave with omega as the varable.
 !-----------------------------------------------------------------------------! 
     complex(wp) function dispersion_function_parallel_3(x)
 	implicit none
@@ -1588,7 +1588,7 @@ contains
     end function dispersion_function_parallel_3
 
 !-----------------------------------------------------------------------------!
-!     dispersion_function_parallel_variable_k_para_1:����������ɫɢ��ϵ
+!     dispersion_function_parallel_variable_k_para_1: the dispersion relation of left hand wave with k_para as the varable.
 !-----------------------------------------------------------------------------!
     complex(wp) function dispersion_function_parallel_variable_k_para_1(x)
 	implicit none
@@ -1601,7 +1601,7 @@ contains
     end function dispersion_function_parallel_variable_k_para_1
        
 !-----------------------------------------------------------------------------!
-!     dispersion_function_parallel_2:����������ɫɢ��ϵ
+!     dispersion_function_parallel_2:the dispersion relation of right hand wave with k_para as the varable.
 !-----------------------------------------------------------------------------! 
     complex(wp) function dispersion_function_parallel_variable_k_para_2(x)
 	implicit none
@@ -1614,7 +1614,7 @@ contains
     end function dispersion_function_parallel_variable_k_para_2
     
 !-----------------------------------------------------------------------------!
-!     dispersion_function_parallel_3:��������������Langmuir��ɫɢ��ϵ
+!     dispersion_function_parallel_3:the dispersion relation of langmuir and ion acoustic wave with k_para as the varable.
 !-----------------------------------------------------------------------------! 
     complex(wp) function dispersion_function_parallel_variable_k_para_3(x)
 	implicit none
@@ -1627,7 +1627,7 @@ contains
     end function dispersion_function_parallel_variable_k_para_3    
 
 !-----------------------------------------------------------------------------!
-!     dispersion_function:����б�������λ�ֱ�������ε�ɫɢ��ϵ
+!     dispersion_function:dispersion relation with omega as the variable
 !-----------------------------------------------------------------------------! 
     complex(wp) function dispersion_function(x)
 	implicit none
@@ -1645,7 +1645,7 @@ contains
     end function dispersion_function
     
 !-----------------------------------------------------------------------------!
-!     dispersion_function_variable_k_para:����k_paraΪ����ʱб������ֱ�������ε�ɫɢ��ϵ
+!     dispersion_function_variable_k_para: dispersion relation with k_para as the variable
 !-----------------------------------------------------------------------------! 
     complex(wp) function dispersion_function_variable_k_para(x)
 	implicit none
@@ -1665,7 +1665,7 @@ contains
     end function dispersion_function_variable_k_para
 
 !-----------------------------------------------------------------------------!
-!     dispersion_function_variable_k_per:����k_perΪ����ʱб������ֱ�������ε�ɫɢ��ϵ
+!     dispersion_function_variable_k_per: dispersion relation with k_perp as the variable
 !-----------------------------------------------------------------------------! 
     complex(wp) function dispersion_function_variable_k_per(x)
 	implicit none
@@ -1685,7 +1685,7 @@ contains
     end function dispersion_function_variable_k_per 
     
 !-----------------------------------------------------------------------------!
-!     electron_dispersion_function_variable_k_per:������ӻ���Ƶ��k_perΪ����ʱб������ֱ�������ε�ɫɢ��ϵ
+!     electron_dispersion_function_variable_k_per: dispersion relation only considering electron with k_perp as the variable
 !-----------------------------------------------------------------------------! 
     complex(wp) function electron_dispersion_function_variable_k_per(x)
 	implicit none
@@ -1705,7 +1705,7 @@ contains
     end function electron_dispersion_function_variable_k_per 
     
 !-----------------------------------------------------------------------------!
-!     dispersion_function_parallel_variable_k_para:����k_paraΪ����ʱƽ�д������ε�ɫɢ��ϵ
+!     dispersion_function_parallel_variable_k_para:dispersion relation for parallel waves with k_para as the variable
 !-----------------------------------------------------------------------------! 
     complex(wp) function dispersion_function_parallel_variable_k_para(x)
 	implicit none
@@ -1726,7 +1726,7 @@ contains
     end function dispersion_function_parallel_variable_k_para   
     
 !-----------------------------------------------------------------------------!
-!     cold_plasma_dispersion_function:�������������ɫɢ��ϵ
+!     cold_plasma_dispersion_function:dispersion relation for cold plasma with omega as the variable
 !-----------------------------------------------------------------------------! 
     subroutine cold_plasma_dispersion_function_matrix(x,D)
     implicit none
@@ -1781,7 +1781,7 @@ contains
     end function cold_plasma_dispersion_function
     
 !-----------------------------------------------------------------------------!
-!     cold_plasma_dispersion_function_k_per:�Դ�ֱ������Ϊ�����������������ɫɢ��ϵ
+!     cold_plasma_dispersion_function_k_per:dispersion relation for cold plasma with k_perp as the variable
 !-----------------------------------------------------------------------------! 
     subroutine cold_plasma_dispersion_function_matrix_k_per(x,D)
     implicit none
@@ -1828,7 +1828,7 @@ contains
     end function cold_plasma_dispersion_function_k_per
 
 !-----------------------------------------------------------------------------!
-!     left_cut_off:����������ֹ�����omega_pe_div_omega
+!     left_cut_off:calculate the left cut off line (omega_pe_div_omega_ce_2)
 !-----------------------------------------------------------------------------!  
     real(wp) function left_cut_off(omega_ce_div_x)
 		implicit none
@@ -1839,7 +1839,7 @@ contains
     end function left_cut_off
  
 !-----------------------------------------------------------------------------!
-!     right_cut_off:����������ֹ�����omega_pe_div_omega
+!     right_cut_off:calculate the right cut off line (omega_pe_div_omega_ce_2)
 !-----------------------------------------------------------------------------!    
     real(wp) function right_cut_off(omega_ce_div_x)
 		implicit none
@@ -1850,7 +1850,7 @@ contains
     end function right_cut_off
  
 !-----------------------------------------------------------------------------!
-!     resonance:���㹲�������omega_pe_div_omega
+!     resonance:calculate the resonance line (omega_pe_div_omega_ce_2)
 !-----------------------------------------------------------------------------!  
     real(wp) function resonance(omega_ce_div_x)
 		implicit none
@@ -1862,7 +1862,7 @@ contains
     
  
 !-----------------------------------------------------------------------------!
-!     test_fun5:���Ժ���5
+!     test_fun5:test function 5
 !-----------------------------------------------------------------------------!  
     complex(wp) function test_fun5(x)
 	implicit none
@@ -1884,7 +1884,7 @@ contains
     end function l_wave
     
 !-----------------------------------------------------------------------------!
-!     polarization:���㱾��ģʽ��������
+!     polarization: caculate the polarization of the plasma wave
 !-----------------------------------------------------------------------------!  
     subroutine polarization(x,eigen,polar)
 	implicit none
@@ -1973,7 +1973,7 @@ contains
 	polar=vr(1:3,e_min)
     end subroutine cold_polarization
 !-----------------------------------------------------------------------------!
-!     damping_rate:���������������landu������
+!     damping_rate:calculate the damping rate with an approximate expression
 !-----------------------------------------------------------------------------!     
     complex(wp) function damping_rate(x)
 	implicit none
