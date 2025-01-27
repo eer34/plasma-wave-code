@@ -68,9 +68,9 @@ contains
     !test_fun3=log(test_fun3)
     end function test_fun3
 !-----------------------------------------------------------------------------!
-!     set_parameter: given k to calculate omega
+!     set_parameter_old_version: given k to calculate omega (old version)
 !-----------------------------------------------------------------------------!    
-    subroutine set_parameter(b,n,ti_para,ti_per,te_para,te_per,k_para,k_per)
+    subroutine set_parameter_old_version(b,n,ti_para,ti_per,te_para,te_per,k_para,k_per)
     implicit none
     real(wp),intent(in)::b,n,ti_para,ti_per,te_para,te_per,k_para,k_per
     real(wp)::c,e,mi,me,epsilon_0,vi_para,vi_per,ve_para,ve_per
@@ -105,8 +105,28 @@ contains
     k_para_rho_e_per=k_para*rho_e_per
     k_per_rho_e_per=k_per*rho_e_per
     k_per_rho_e_para=k_per*rho_e_para
-    end subroutine set_parameter
-    
+    end subroutine set_parameter_old_version
+
+!-----------------------------------------------------------------------------!
+!     set_parameter: given k to calculate omega (new version)
+!-----------------------------------------------------------------------------!    
+    subroutine set_parameter(c_div_v_para_input,omega_pe_div_omega_ce_input,k_para_rho_i_para_input,k_para_rho_e_para_input,k_para_rho_e_per_input,k_per_rho_i_para_input,k_per_rho_i_per_input,k_per_rho_e_para_input,k_per_rho_e_per_input)
+		implicit none
+		real(wp),intent(in)::c_div_v_para_input,omega_pe_div_omega_ce_input,k_para_rho_i_para_input,k_para_rho_e_para_input,k_para_rho_e_per_input,k_per_rho_i_para_input,k_per_rho_i_per_input,k_per_rho_e_para_input,k_per_rho_e_per_input
+		
+		c_div_v_para=c_div_v_para_input
+		omega_pe_div_omega_ce=omega_pe_div_omega_ce_input
+		omega_pi_div_omega_ci=omega_pe_div_omega_ce_input*1836
+		
+		k_para_rho_i_para=k_para_rho_i_para_input
+		k_per_rho_i_para=k_per_rho_i_para_input
+		k_per_rho_i_per=k_per_rho_i_per_input
+		k_para_rho_e_para=k_para_rho_e_para_input
+		k_para_rho_e_per=k_para_rho_e_per_input
+		k_per_rho_e_per=k_per_rho_e_per_input
+		k_per_rho_e_para=k_per_rho_e_para_input
+		end subroutine set_parameter
+		
 !-----------------------------------------------------------------------------!
 !     set_parameter_variable_k_para:given omega k_perp to calculate k_para
 !-----------------------------------------------------------------------------!    
@@ -1634,7 +1654,7 @@ contains
 	complex(wp),intent(in)::x
 	complex(wp)::D(3,3)
 	integer::n,k
-	call dispersion_function_matrix(x,D)
+	call dispersion_function_parallel_matrix(x,D)
 	do n=1,3
 	    do k=1,3
 		D(n,k)=D(n,k)/1000
@@ -1894,8 +1914,7 @@ contains
 	complex(wp)::D(3,3),w(3),vl(3,3),vr(3,3)
 	integer::n,k,info,e_min
 	complex(wp)::y
-    y=x*omega_div_omega_ci/(c_div_v_para)**(0.5)
-	call dispersion_function_matrix_variable_k_per(y,D)
+	call dispersion_function_parallel_matrix(x,D)
     do n=1,3
 	  do k=1,3
 		  D(n,k)=D(n,k)/1000
