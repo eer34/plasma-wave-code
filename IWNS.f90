@@ -16,7 +16,7 @@
         integer::n_circle,n_line,n_error
 		real(wp)::ti_div_te
         real(wp)::c_div_v_para_input,omega_pe_div_omega_ce_input,k_para_rho_i_para_input,k_para_rho_e_para_input,k_para_rho_e_per_input,k_per_rho_i_para_input,k_per_rho_i_per_input,k_per_rho_e_para_input,k_per_rho_e_per_input
-
+		real(wp)::k_para_c_div_omega_ci
         integer::fid,n,k,region_i
         integer::ierr,my_id,num_procs
         real(wp)::start_cpu_time,finish_cpu_time
@@ -39,10 +39,11 @@
         if (my_id==0) then
 	  		open(fid,file='output.csv')
         end if
-		ti_div_te=0.1_wp
-        c_div_v_para_input=470000.0_wp
-		omega_pe_div_omega_ce_input=0.02**2*c_div_v_para_input/1836.0_wp*2*ti_div_te
-		k_para_rho_i_para_input=0.1_wp*(2*ti_div_te)**(0.5)
+		ti_div_te=1.0_wp
+        c_div_v_para_input=470000.0_wp/2.0_wp
+		k_para_c_div_omega_ci=7.0_wp
+		omega_pe_div_omega_ce_input=1.0_wp
+		k_para_rho_i_para_input=k_para_c_div_omega_ci/(c_div_v_para_input)**(0.5)
 		k_para_rho_e_para_input=k_para_rho_i_para_input*(1.0_wp/1836.0_wp/ti_div_te)**(0.5)
 		k_para_rho_e_per_input=k_para_rho_e_para_input
 		k_per_rho_i_para_input=0.0_wp
@@ -52,7 +53,7 @@
 		call set_parameter(c_div_v_para_input,omega_pe_div_omega_ce_input,k_para_rho_i_para_input,k_para_rho_e_para_input,k_para_rho_e_per_input,k_per_rho_i_para_input,k_per_rho_i_per_input,k_per_rho_e_para_input,k_per_rho_e_per_input)
 
 		left_edge=0.01_wp
-		right_edge=1.01_wp
+		right_edge=1.51_wp
 		down_edge=-4*k_para_rho_i_para_input
 		up_edge=0.21_wp 
 
@@ -71,7 +72,7 @@
 				write(*,*),'ans_z_error are',ans_z_error(n)
 				write(*,*),'ans_f_solve are',ans_f_solve(n)
 				call polarization(ans_z_solve(n),eigen,polar)
-				write(fid,'(*(G30.7,:,",",X))') k_para_rho_i_para_input,n,real(ans_z_solve(n)),aimag(ans_z_solve(n)),ans_mul_solve(n),ans_z_error(n),abs(ans_f_solve(n)),eigen,polar(1),polar(2),polar(3)
+				write(fid,'(*(G30.7,:,",",X))') k_para_c_div_omega_ci,c_div_v_para_input,n,real(ans_z_solve(n)),aimag(ans_z_solve(n)),ans_mul_solve(n),ans_z_error(n),abs(ans_f_solve(n)),eigen,polar(1),polar(2),polar(3)
 				
 			end do
 		end if
