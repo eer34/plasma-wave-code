@@ -58,6 +58,7 @@ contains
         test_fun2=determinant
         !test_fun2=log(test_fun2)
     end function test_fun2
+
 !-----------------------------------------------------------------------------!
 !     test_function_3_plasma_dispersion_function
 !-----------------------------------------------------------------------------!       
@@ -1797,7 +1798,7 @@ contains
 	!	end do
 	!end do
 	cold_plasma_dispersion_function=det(D,3)
-	cold_plasma_dispersion_function=log(cold_plasma_dispersion_function)
+	!cold_plasma_dispersion_function=log(cold_plasma_dispersion_function)
     end function cold_plasma_dispersion_function
     
 !-----------------------------------------------------------------------------!
@@ -1914,7 +1915,8 @@ contains
 	complex(wp)::D(3,3),w(3),vl(3,3),vr(3,3)
 	integer::n,k,info,e_min
 	complex(wp)::y
-	call dispersion_function_parallel_matrix(x,D)
+	!call dispersion_function_parallel_matrix(x,D)
+	call cold_plasma_dispersion_function_matrix(x,D)
     do n=1,3
 	  do k=1,3
 		  D(n,k)=D(n,k)/1000

@@ -40,7 +40,7 @@
 	  		open(fid,file='output.csv')
         end if
 		ti_div_te=1.0_wp
-        c_div_v_para_input=470000.0_wp/2.0_wp
+        c_div_v_para_input=470000.0_wp
 		k_para_c_div_omega_ci=7.0_wp
 		omega_pe_div_omega_ce_input=1.0_wp
 		k_para_rho_i_para_input=k_para_c_div_omega_ci/(c_div_v_para_input)**(0.5)
@@ -62,7 +62,7 @@
 		allocate(ans_z_error(n_error))
 		allocate(ans_f_solve(n_error))
 
-		call zero_pole_location(dispersion_function,ierr,left_edge,right_edge,down_edge,up_edge,kc_square,epsilon_i,epsilon_accuracy_limit,n_circle,n_line,epsilon_0,z_solve_number,ans_z_solve,ans_mul_solve,ans_z_error,ans_f_solve)
+		call zero_pole_location(cold_plasma_dispersion_function,ierr,left_edge,right_edge,down_edge,up_edge,kc_square,epsilon_i,epsilon_accuracy_limit,n_circle,n_line,epsilon_0,z_solve_number,ans_z_solve,ans_mul_solve,ans_z_error,ans_f_solve)
 		
 		if (my_id==0) then
 			do n=1,z_solve_number
@@ -72,7 +72,7 @@
 				write(*,*),'ans_z_error are',ans_z_error(n)
 				write(*,*),'ans_f_solve are',ans_f_solve(n)
 				call polarization(ans_z_solve(n),eigen,polar)
-				write(fid,'(*(G30.7,:,",",X))') k_para_c_div_omega_ci,c_div_v_para_input,n,real(ans_z_solve(n)),aimag(ans_z_solve(n)),ans_mul_solve(n),ans_z_error(n),abs(ans_f_solve(n)),eigen,polar(1),polar(2),polar(3)
+				write(fid,'(*(G30.7,:,",",X))') k_para_c_div_omega_ci,n,real(ans_z_solve(n)),aimag(ans_z_solve(n)),ans_mul_solve(n),ans_z_error(n),abs(ans_f_solve(n)),eigen,polar(1),polar(2),polar(3)
 				
 			end do
 		end if
