@@ -39,13 +39,13 @@
         if (my_id==0) then
 	  		open(fid,file='output.csv')
         end if
-		do k=1,30
+		do k=1,200
 			omega_ce_div_omega=1.2_wp
-			omega_pe_div_omega_square=0.1_wp*k
+			omega_pe_div_omega_square=0.01_wp*k
 			c_div_v_para_input=470000.0_wp
 			omega_pe_div_omega_ce_input=omega_pe_div_omega_square/omega_ce_div_omega/omega_ce_div_omega
 			omega_div_omega_ci_input=1836.0_wp/omega_ce_div_omega
-			refractive_para=2.0_wp
+			refractive_para=3.0_wp
 			k_para_rho_i_input=refractive_para*omega_div_omega_ci_input/(c_div_v_para_input)**(0.5)
 			
 			call set_parameter_variable_k_per(c_div_v_para_input,omega_pe_div_omega_ce_input,omega_div_omega_ci_input,k_para_rho_i_input)
@@ -53,8 +53,8 @@
 				if (region_i==1) then
 					left_edge=0.01_wp
 					right_edge=4.01_wp
-					down_edge=-0.99_wp
-					up_edge=1.01_wp   
+					down_edge=-1.49_wp
+					up_edge=1.51_wp   
 				else
 					left_edge=4.01_wp+(region_i-2)*5.0_wp
 					right_edge=left_edge+5.0_wp
