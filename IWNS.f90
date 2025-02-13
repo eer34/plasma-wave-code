@@ -61,7 +61,7 @@
 					down_edge=-0.9_wp
 					up_edge=1.1_wp
 				end if
-		  
+				
 				allocate(ans_z_solve(1:n_error))
 				allocate(ans_mul_solve(1:n_error))
 				allocate(ans_z_error(1:n_error))
@@ -69,18 +69,20 @@
 		  
 				call zero_pole_location(dispersion_function_variable_k_per,ierr,left_edge,right_edge,down_edge,up_edge,kc_square,epsilon_i,epsilon_accuracy_limit,n_circle,n_line,epsilon_0,z_solve_number,ans_z_solve,ans_mul_solve,ans_z_error,ans_f_solve)
 				!call zero_pole_location(cold_plasma_dispersion_function_k_per,left_edge,right_edge,down_edge,up_edge,kc_square,epsilon_i,epsilon_accuracy_limit,n_circle,n_line,epsilon_0,z_solve_number,ans_z_solve,ans_mul_solve,ans_z_error,ans_f_solve)
-			
-				do n=1,z_solve_number
-					write(*,*),n,':'
-					write(*,*),'ans_z_solve are',ans_z_solve(n)
-					write(*,*),'ans_mul_solve are',ans_mul_solve(n)
-					write(*,*),'ans_z_error are',ans_z_error(n)
-					write(*,*),'ans_f_solve are',ans_f_solve(n)
-					call polarization(ans_z_solve(n),eigen,polar)
-					!call cold_polarization(ans_z_solve(n),eigen,polar)
-					write(fid,'(*(G30.7,:,",",X))') omega_pe_div_omega_square,omega_ce_div_omega,refractive_para,real(ans_z_solve(n)),aimag(ans_z_solve(n)),ans_mul_solve(n),ans_z_error(n),abs(ans_f_solve(n)),eigen,polar(1),polar(2),polar(3)
 				
-				end do
+				if (my_id==0) then
+					do n=1,z_solve_number
+						write(*,*),n,':'
+						write(*,*),'ans_z_solve are',ans_z_solve(n)
+						write(*,*),'ans_mul_solve are',ans_mul_solve(n)
+						write(*,*),'ans_z_error are',ans_z_error(n)
+						write(*,*),'ans_f_solve are',ans_f_solve(n)
+						call polarization(ans_z_solve(n),eigen,polar)
+						!call cold_polarization(ans_z_solve(n),eigen,polar)
+						write(fid,'(*(G30.7,:,",",X))') omega_pe_div_omega_square,omega_ce_div_omega,refractive_para,real(ans_z_solve(n)),aimag(ans_z_solve(n)),ans_mul_solve(n),ans_z_error(n),abs(ans_f_solve(n)),eigen,polar(1),polar(2),polar(3)
+					
+					end do
+				end if
 				deallocate(ans_z_solve)
 				deallocate(ans_mul_solve)
 				deallocate(ans_z_error)
