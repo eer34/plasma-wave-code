@@ -1914,7 +1914,8 @@ contains
 	complex(wp)::D(3,3),w(3),vl(3,3),vr(3,3)
 	integer::n,k,info,e_min
 	complex(wp)::y
-	call dispersion_function_parallel_matrix(x,D)
+	y=x*omega_div_omega_ci/(c_div_v_para)**(0.5)
+	call dispersion_function_matrix_variable_k_per(y,D)
     do n=1,3
 	  do k=1,3
 		  D(n,k)=D(n,k)/1000
