@@ -1654,7 +1654,7 @@ contains
 	complex(wp),intent(in)::x
 	complex(wp)::D(3,3)
 	integer::n,k
-	call dispersion_function_parallel_matrix(x,D)
+	call dispersion_function_matrix(x,D)
 	do n=1,3
 	    do k=1,3
 		D(n,k)=D(n,k)/1000
@@ -1914,7 +1914,7 @@ contains
 	complex(wp)::D(3,3),w(3),vl(3,3),vr(3,3)
 	integer::n,k,info,e_min
 	complex(wp)::y
-	call dispersion_function_parallel_matrix(x,D)
+	call dispersion_function_matrix(x,D)
     do n=1,3
 	  do k=1,3
 		  D(n,k)=D(n,k)/1000
