@@ -29,7 +29,7 @@
         n_error=1000
 		kc_square=128.0_wp
 		epsilon_i=1d-7
-		epsilon_accuracy_limit=1d-5
+		epsilon_accuracy_limit=1d-6
 		n_circle=400
 		n_line=400
 		epsilon_0=0.1_wp
@@ -41,8 +41,9 @@
 			ti_div_te=1.0_wp
 			c_div_v_para_input=470000.0_wp/2.0_wp
 			omega_pe_div_omega_ce_input=1.0_wp
-			k_para_rho_i_para_input=0.5_wp*k
-			k_para_rho_e_para_input=k_para_rho_i_para_input*(1.0_wp/1836.0_wp/ti_div_te)**(0.5)
+			k_para_c_div_omega_ci=340.0_wp*k
+			k_para_rho_i_para_input=k_para_c_div_omega_ci/(c_div_v_para_input)**(0.5)
+			k_para_rho_e_para_input=-k_para_rho_i_para_input*(1.0_wp/1836.0_wp/ti_div_te)**(0.5)
 			k_para_rho_e_per_input=k_para_rho_e_para_input
 			k_per_rho_i_para_input=0.1_wp*k_para_rho_i_para_input
 			k_per_rho_i_per_input=0.1_wp*k_para_rho_i_para_input
