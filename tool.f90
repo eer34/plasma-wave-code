@@ -11,9 +11,10 @@
  implicit none
  private c_div_v_para,omega_div_omega_ci,omega_div_omega_ce,omega_pi_div_omega_ci,omega_pe_div_omega_ce,ratio_ti,ratio_te,refractive_para
  private k_para_rho_i_para,k_per_rho_i_para,k_per_rho_i_per,k_para_rho_e_para,k_para_rho_e_per,k_per_rho_e_para,k_per_rho_e_per
+ private beta,kap_n,kap_ti,kap_te,k_para_rho_i,k_para_rho_e,k_x_rho_i,k_y_rho_i
  real(wp)::c_div_v_para,omega_div_omega_ci,omega_div_omega_ce,omega_pi_div_omega_ci,omega_pe_div_omega_ce,k_per_rho_e_per,ratio_ti,ratio_te,refractive_para
  real(wp)::k_para_rho_i_para,k_per_rho_i_para,k_per_rho_i_per,k_para_rho_e_para,k_para_rho_e_per,k_per_rho_e_para
- 
+ real(wp)::beta,kap_n,kap_ti,kap_te,k_para_rho_i,k_para_rho_e,k_x_rho_i,k_y_rho_i
 contains
 
 !-----------------------------------------------------------------------------!
@@ -233,6 +234,57 @@ contains
     omega_pe_div_omega_ce=omega_pe_div_omega_ce_input
     omega_pi_div_omega_ci=omega_pe_div_omega_ce*1836
     end subroutine set_parameter_special
+
+!-----------------------------------------------------------------------------!
+!     set_parameter_itg:given k to calculate omega for ITG
+!-----------------------------------------------------------------------------!
+    
+    subroutine set_parameter_itg(beta_in,kap_n_in,kap_ti_in,kap_te_in,k_para_rho_i_in,k_para_rho_e_in,k_x_rho_i_in,k_y_rho_i_in)
+		implicit none
+		real(wp),intent(in)::beta_in,kap_n_in,kap_ti_in,kap_te_in,k_para_rho_i_in,k_para_rho_e_in,k_x_rho_i_in,k_y_rho_i_in
+		beta=beta_in
+		kap_n=kap_n_in
+		kap_ti=kap_ti_in
+		kap_te=kap_te_in
+		k_para_rho_i=k_para_rho_i_in
+		k_para_rho_e=k_para_rho_e_in
+		k_x_rho_i=k_x_rho_i_in	
+		k_y_rho_i=k_y_rho_i_in
+			
+	end subroutine set_parameter_itg
+!-----------------------------------------------------------------------------!
+!     dispersion_function_itg: the dispersion relation of itg with omega as the varable.
+!-----------------------------------------------------------------------------!
+    complex(wp) function dispersion_function_itg(y)
+	implicit none
+	complex(wp),intent(in)::y
+	complex(wp)::x
+	complex(wp)::Mi, Me, Ne, Ni, x_e,Li,Le
+	complex(wp)::xi_pdf,xe_pdf,yi_pdf,ye_pdf
+	complex(wp)::omega,omega_ti,omega_te
+	real(wp)::gamma_0,gamma_1,b,gamma_star
+	x=y/100
+	x_e=-x/1836
+	b=k_x_rho_i**2+k_y_rho_i**2
+	call bessel_gn(b,0, gamma_0)
+	call bessel_gn(b,1, gamma_1)
+	gamma_star=gamma_0-b*(gamma_0-gamma_1)
+	omega=kap_n*k_y_rho_i/x
+	omega_ti=kap_ti*k_y_rho_i/x
+	omega_te=kap_te*k_y_rho_i/x
+	xi_pdf=x/k_para_rho_i/2**(0.5)
+	xe_pdf=x_e/k_para_rho_e/2**(0.5)
+	call pdf(xi_pdf,yi_pdf)
+	call pdf(xe_pdf,ye_pdf)
+	Mi=-gamma_0*(1+xi_pdf*yi_pdf)+(1.5*omega_ti*gamma_0-omega_ti*gamma_star-omega*gamma_0)*xi_pdf*yi_pdf-omega_ti*gamma_0*xi_pdf**2*(1+xi_pdf*yi_pdf)
+	Me=1-(omega-omega_te/2-1)*xe_pdf*ye_pdf-omega_te*xe_pdf**2*(1+xe_pdf*ye_pdf)
+	Ni=-x/k_para_rho_i*(omega*gamma_0*(1+xi_pdf*yi_pdf)+(-1.5*omega_ti*gamma_0+gamma_0+omega_ti*gamma_star)*(1+xi_pdf*yi_pdf)+omega_ti*gamma_0*(0.5+xi_pdf**2+xi_pdf**3*yi_pdf))
+	Ne=-x/k_para_rho_i*(omega_te*(0.5+xe_pdf**2*(1+xe_pdf*ye_pdf))+(omega-omega_te/2-1)*(1+xe_pdf*ye_pdf))
+	Li=(omega-omega_ti)*gamma_0+omega_ti*gamma_star
+	Le=omega
+	dispersion_function_itg=-b*k_para_rho_i/x*(Mi-Me-1+gamma_0)-beta*(Ne-Ni)*(1-gamma_0-Li+Le)
+	end function dispersion_function_itg
+
 !-----------------------------------------------------------------------------!
 !     dispersion_function_parallel_matrix: dispersion matrix of omega for parallel waves
 !-----------------------------------------------------------------------------!
