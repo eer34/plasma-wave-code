@@ -38,21 +38,21 @@
         if (my_id==0) then
 	  		open(fid,file='output.csv')
         end if
-		do k=1,1
-			beta_in=0.001
-			kap_n_in=0.04
-			kap_ti_in=0.1
-			kap_te_in=0.0
-			k_para_rho_i_in=1.256*1d-2
-			k_para_rho_e_in=-k_para_rho_i_in/(1836.0)**(0.5)
-			k_x_rho_i_in=0.4
-			k_y_rho_i_in=0.4
+		beta_in=0.001
+		kap_n_in=0.01
+		kap_ti_in=0.2
+		kap_te_in=0.0
+		k_para_rho_i_in=1.256*1d-3
+		k_para_rho_e_in=-k_para_rho_i_in/(1836.0)**(0.5)
+		k_x_rho_i_in=1.0
+		k_y_rho_i_in=1.0
 
-			call set_parameter_itg(beta_in,kap_n_in,kap_ti_in,kap_te_in,k_para_rho_i_in,k_para_rho_e_in,k_x_rho_i_in,k_y_rho_i_in)
-			left_edge=-10.01_wp
-			right_edge=-0.01_wp
+		call set_parameter_itg(beta_in,kap_n_in,kap_ti_in,kap_te_in,k_para_rho_i_in,k_para_rho_e_in,k_x_rho_i_in,k_y_rho_i_in)
+		do k=1,5
+			left_edge=-10.01_wp-10.0_wp*(k-1)
+			right_edge=-0.01_wp-10.0_wp*(k-1)
 			down_edge=-4*k_para_rho_i_in*100
-			up_edge=6.8_wp 
+			up_edge=10.8_wp 
 
 			allocate(ans_z_solve(n_error))
 			allocate(ans_mul_solve(n_error))
