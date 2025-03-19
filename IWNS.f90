@@ -37,7 +37,7 @@
 		n_circle=400
 		n_line=400
 		epsilon_0=0.1_wp
-        kmax=90
+        kmax=10
         if (my_id==0) then
 	  		open(fid_process,file='output_in_process.csv')
         end if
@@ -50,7 +50,7 @@
 		allocate(right_wave_cma_x(110))
         allocate(right_wave_cma_y(110))
 		do k=1,kmax
-			omega_pe_div_omega_ce_input=10**(-1.5_wp+0.05_wp*k)
+			omega_pe_div_omega_ce_input=10**(-0.25_wp+0.05_wp*k)
 			direction=2
 			k_para_rho_i_para_input=0.0_wp
 
@@ -74,24 +74,19 @@
 				wave_max_real=1000.0_wp
                 wave_max_imag=-1000.0_wp
 				least_damped_ratio=100000.0_wp
-				do region_i=1,18
-					if (region_i==1) then
-						left_edge=0.1_wp
-						right_edge=100.0_wp
-						down_edge=max(-4*k_para_rho_i_para_input,-4.0_wp)
-						up_edge=4.0_wp 
-					else
-						left_edge=100.0_wp+100.0_wp*(region_i-2)
-						right_edge=left_edge+100.0_wp
-						down_edge=max(-20*k_para_rho_i_para_input,-0.1*left_edge)
-						up_edge=4.0_wp 
-					end if
+				do region_i=1,6
+					
+					left_edge=omega_pe_div_omega_ce_input**(0.5_wp)*1836.0_wp+50.0_wp*(region_i-1)
+					right_edge=left_edge+50.0_wp
+					down_edge=max(-20*k_para_rho_i_para_input,-0.1*left_edge)
+					up_edge=4.0_wp 
+					
 					allocate(ans_z_solve(n_error))
 					allocate(ans_mul_solve(n_error))
 					allocate(ans_z_error(n_error))
 					allocate(ans_f_solve(n_error))
 
-					call zero_pole_location(dispersion_function_parallel_1,ierr,left_edge,right_edge,down_edge,up_edge,kc_square,epsilon_i,epsilon_accuracy_limit,n_circle,n_line,epsilon_0,z_solve_number,ans_z_solve,ans_mul_solve,ans_z_error,ans_f_solve)
+					call zero_pole_location(dispersion_function_parallel_3,ierr,left_edge,right_edge,down_edge,up_edge,kc_square,epsilon_i,epsilon_accuracy_limit,n_circle,n_line,epsilon_0,z_solve_number,ans_z_solve,ans_mul_solve,ans_z_error,ans_f_solve)
 					
 					if (my_id==0) then
 						do n=1,z_solve_number
@@ -134,7 +129,7 @@
 		close(fid_process)
 		open(fid, file='omega_ce_cma.csv')
         if (my_id==0) then
-			do k=1,90
+			do k=1,kmax
 				write(fid,'(*(G30.7,:,",",X))')  right_wave_cma_x(k) ,right_wave_cma_y(k)
 			end do
 			write(*,*),'running time is',finish_cpu_time-start_cpu_time
