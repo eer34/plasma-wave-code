@@ -134,7 +134,7 @@
 		close(fid_process)
 		open(fid, file='omega_ce_cma.csv')
         if (my_id==0) then
-			do k=1,90
+			do k=1,kmax
 				write(fid,'(*(G30.7,:,",",X))')  right_wave_cma_x(k) ,right_wave_cma_y(k)
 			end do
 			write(*,*),'running time is',finish_cpu_time-start_cpu_time
