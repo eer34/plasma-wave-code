@@ -243,7 +243,8 @@ contains
     complex(wp)::xi_pdf_1,yi_pdf_1,xi_pdf_2,yi_pdf_2,x_e
     complex(wp)::xe_pdf_1,ye_pdf_1,xe_pdf_2,ye_pdf_2
 	x_e=-x/1836
-    
+    ratio_ti=1
+	ratio_te=1
 	xi_pdf_1=(x-(1,0))/k_para_rho_i_para
 	call pdf(xi_pdf_1,yi_pdf_1)
 	xi_pdf_2=(x+(1,0))/k_para_rho_i_para
@@ -1569,7 +1570,7 @@ contains
     end function electron_bernstein_wave
     
 !-----------------------------------------------------------------------------!
-!     dispersion_function_parallel_1: the dispersion relation of left hand wave with omega as the varable.
+!     dispersion_function_parallel_1: the dispersion relation of right hand wave with omega as the varable.
 !-----------------------------------------------------------------------------!
     complex(wp) function dispersion_function_parallel_1(x)
 	implicit none
@@ -1582,7 +1583,7 @@ contains
     end function dispersion_function_parallel_1
        
 !-----------------------------------------------------------------------------!
-!     dispersion_function_parallel_2: the dispersion relation of right hand wave with omega as the varable.
+!     dispersion_function_parallel_2: the dispersion relation of left hand wave with omega as the varable.
 !-----------------------------------------------------------------------------! 
     complex(wp) function dispersion_function_parallel_2(x)
 	implicit none
