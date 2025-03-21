@@ -517,18 +517,21 @@ MODULE MATHFUNCTION
         integer,parameter:: lenw=limit*4
         real(wp) :: abserr, ans, work(lenw)
         integer :: ier, iwork(limit), last, neval
-        
-        a=0.0_wp
-        b=10.0_wp
-        epsabs=1d-7
-        epsrel=1d-7
-        x_integral=x
-        n_integral=n
-        call dqag(bessel_integral, a, b, epsabs, epsrel, key, ans, &
-                    abserr, neval, ier, limit, lenw, last, &
-                    iwork, work)
-            
-        gn=ans
+        if (x>=700.0_wp) then
+            gn=0.0_wp
+        else
+            a=0.0_wp
+            b=10.0_wp
+            epsabs=1d-7
+            epsrel=1d-7
+            x_integral=x
+            n_integral=n
+            call dqag(bessel_integral, a, b, epsabs, epsrel, key, ans, &
+                        abserr, neval, ier, limit, lenw, last, &
+                        iwork, work)
+                
+            gn=ans
+        end if
     end subroutine bessel_gn
     
     
