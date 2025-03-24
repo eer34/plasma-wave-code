@@ -11,9 +11,10 @@
  implicit none
  private c_div_v_para,omega_div_omega_ci,omega_div_omega_ce,omega_pi_div_omega_ci,omega_pe_div_omega_ce,ratio_ti,ratio_te,refractive_para
  private k_para_rho_i_para,k_per_rho_i_para,k_per_rho_i_per,k_para_rho_e_para,k_para_rho_e_per,k_per_rho_e_para,k_per_rho_e_per
+ private omega_pd_div_omega_cd, k_para_c_div_omega_ci,k_per_c_div_omega_ci
  real(wp)::c_div_v_para,omega_div_omega_ci,omega_div_omega_ce,omega_pi_div_omega_ci,omega_pe_div_omega_ce,k_per_rho_e_per,ratio_ti,ratio_te,refractive_para
  real(wp)::k_para_rho_i_para,k_per_rho_i_para,k_per_rho_i_per,k_para_rho_e_para,k_para_rho_e_per,k_per_rho_e_para
- 
+ real(wp):: omega_pd_div_omega_cd, k_para_c_div_omega_ci,k_per_c_div_omega_ci
 contains
 
 !-----------------------------------------------------------------------------!
@@ -127,6 +128,20 @@ contains
 		k_per_rho_e_para=k_per_rho_e_para_input
 		end subroutine set_parameter
 		
+!-----------------------------------------------------------------------------!
+!     set_parameter_cold: given k to calculate omega (cold plasma version)
+!-----------------------------------------------------------------------------!    
+		subroutine set_parameter_cold(omega_pe_div_omega_ce_input,k_para_c_div_omega_ci_input,k_per_c_div_omega_ci_input)
+			implicit none
+			real(wp),intent(in)::omega_pe_div_omega_ce_input,k_para_c_div_omega_ci_input,k_per_c_div_omega_ci_input
+			
+			omega_pe_div_omega_ce=omega_pe_div_omega_ce_input
+			omega_pi_div_omega_ci=omega_pe_div_omega_ce_input*1836/2
+			omega_pd_div_omega_cd=omega_pe_div_omega_ce_input*1836
+			k_para_c_div_omega_ci=k_para_c_div_omega_ci_input
+			k_per_c_div_omega_ci=k_per_c_div_omega_ci_input
+			end subroutine set_parameter_cold
+
 !-----------------------------------------------------------------------------!
 !     set_parameter_variable_k_para:given omega k_perp to calculate k_para
 !-----------------------------------------------------------------------------!    
@@ -1818,7 +1833,44 @@ contains
 	cold_plasma_dispersion_function=det(D,3)
 	cold_plasma_dispersion_function=log(cold_plasma_dispersion_function)
     end function cold_plasma_dispersion_function
-    
+
+!-----------------------------------------------------------------------------!
+!     cold_plasma_dispersion_function_two_ion_species:dispersion relation for cold plasma with omega as the variable with two ion species.
+!-----------------------------------------------------------------------------! 
+	subroutine cold_plasma_dispersion_function_two_ion_species_matrix(x,D)
+		implicit none
+		complex(wp),intent(in)::x
+		complex(wp),intent(out)::D(:,:)
+		complex(wp)::x_e,x_d,ka,k_per,k_para
+	
+			x_e=-x/1836
+			x_d=2*x
+			k_per=1-omega_pi_div_omega_ci/(x**2-1)-omega_pe_div_omega_ce/(x_e**2-1)-omega_pd_div_omega_cd/(x_d**2-1)
+			ka=omega_pi_div_omega_ci/(x**2-1)/x+omega_pe_div_omega_ce/(x_e**2-1)/x_e+omega_pd_div_omega_cd/(x_d**2-1)/x_d
+			k_para=1-omega_pi_div_omega_ci/x**2-omega_pe_div_omega_ce/x_e**2-omega_pd_div_omega_cd/x_d**2
+			D(1,1)=k_para_c_div_omega_ci**2/x**2-k_per
+			D(1,2)=(0,1)*ka
+			D(1,3)=-k_para_c_div_omega_ci*k_per_c_div_omega_ci/x**2
+			D(2,1)=-D(1,2)
+			D(2,2)=(k_para_c_div_omega_ci**2+k_per_c_div_omega_ci**2)/x**2-k_per
+			D(2,3)=(0,0)
+			D(3,1)=D(1,3)
+			D(3,2)=(0,0)
+			D(3,3)=k_per_c_div_omega_ci**2/x**2-k_para
+		
+	end subroutine cold_plasma_dispersion_function_two_ion_species_matrix
+		
+		
+	complex(wp) function cold_plasma_dispersion_function_two_ion_species(x)
+		implicit none
+		complex(wp),intent(in)::x
+		complex(wp)::x_e,x_d,ka,k_per,k_para
+		complex(wp)::D(3,3)
+		integer::n,k
+		call cold_plasma_dispersion_function_two_ion_species_matrix(x,D)
+		cold_plasma_dispersion_function_two_ion_species=det(D,3)
+	end function cold_plasma_dispersion_function_two_ion_species
+	
 !-----------------------------------------------------------------------------!
 !     cold_plasma_dispersion_function_k_per:dispersion relation for cold plasma with k_perp as the variable
 !-----------------------------------------------------------------------------! 
@@ -1933,7 +1985,7 @@ contains
 	complex(wp)::D(3,3),w(3),vl(3,3),vr(3,3)
 	integer::n,k,info,e_min
 	complex(wp)::y
-	call dispersion_function_matrix(x,D)
+	call cold_plasma_dispersion_function_two_ion_species_matrix(x,D)
     do n=1,3
 	  do k=1,3
 		  D(n,k)=D(n,k)/1000
