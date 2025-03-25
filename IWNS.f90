@@ -23,6 +23,7 @@
 		real(wp),allocatable::x_wave_cma_x(:),x_wave_cma_y(:)
 		integer::direction,kmax,ti_number
 		real(wp)::k_para_c_div_omega_ci_input,k_per_c_div_omega_ci_input
+		real(wp)::k_para_rho_d_para_input,k_per_rho_d_para_input,k_per_rho_d_per_input
         call mpi_init(ierr)
         call mpi_comm_rank(mpi_comm_world,my_id,ierr)
         call mpi_comm_size(mpi_comm_world,num_procs,ierr)
@@ -37,27 +38,33 @@
 		n_line=400
 		epsilon_0=0.1_wp
         if (my_id==0) then
-			open(fid, file='x_wave_boundary.csv')
+			open(fid, file='perpendicular wave.csv')
         end if
-		k_para_c_div_omega_ci_input=0.0_wp
-		k_per_c_div_omega_ci_input=0.0_wp
+		k_para_rho_i_para_input=0.0_wp
+		k_para_rho_e_para_input=0.0_wp
+		k_para_rho_d_para_input=0.0_wp
 		omega_pe_div_omega_ce_input=1.0_wp
+		c_div_v_para_input=470000.0_wp
 		do k=1,100
-			k_para_c_div_omega_ci_input=1.0_wp*k
-			
-			call set_parameter_cold(omega_pe_div_omega_ce_input,k_para_c_div_omega_ci_input,k_per_c_div_omega_ci_input)
-			do region_i=1,1
-				left_edge=0.01_wp+10.0_wp*(region_i-1)
-				right_edge=left_edge+10.0_wp
-				up_edge=0.6_wp 
-				down_edge=-0.4_wp
+			k_per_rho_i_para_input=0.005_wp*k
+			k_per_rho_i_per_input=k_per_rho_i_para_input
+			k_per_rho_e_para_input=-k_per_rho_i_para_input/(1836.0_wp)**(0.5_wp)
+			k_per_rho_e_per_input=k_per_rho_e_para_input
+			k_per_rho_d_para_input=k_per_rho_i_para_input*(2.0_wp)**(0.5_wp)
+			k_per_rho_d_per_input=k_per_rho_d_para_input
+			call set_parameter_two_ion_species(c_div_v_para_input,omega_pe_div_omega_ce_input,k_para_rho_i_para_input,k_per_rho_i_para_input,k_per_rho_i_per_input,k_para_rho_e_para_input,k_per_rho_e_para_input,k_per_rho_e_per_input,k_para_rho_d_para_input,k_per_rho_d_para_input,k_per_rho_d_per_input)
+			do region_i=1,5
+				left_edge=0.01_wp+1.0_wp*(region_i-1)
+				right_edge=left_edge+1.0_wp
+				up_edge=0.16_wp 
+				down_edge=-0.14_wp
 				
 				allocate(ans_z_solve(n_error))
 				allocate(ans_mul_solve(n_error))
 				allocate(ans_z_error(n_error))
 				allocate(ans_f_solve(n_error))
 
-				call zero_pole_location(cold_plasma_dispersion_function_two_ion_species,ierr,left_edge,right_edge,down_edge,up_edge,kc_square,epsilon_i,epsilon_accuracy_limit,n_circle,n_line,epsilon_0,z_solve_number,ans_z_solve,ans_mul_solve,ans_z_error,ans_f_solve)
+				call zero_pole_location(dispersion_function_two_ion_species,ierr,left_edge,right_edge,down_edge,up_edge,kc_square,epsilon_i,epsilon_accuracy_limit,n_circle,n_line,epsilon_0,z_solve_number,ans_z_solve,ans_mul_solve,ans_z_error,ans_f_solve)
 				do n=1,z_solve_number
 					if (my_id==0) then
 						if (ans_mul_solve(n)>0) then
@@ -66,7 +73,7 @@
 							eigen=10000.0_wp
 							polar(:)=0.0_wp
 						end if
-						write(fid,'(*(G30.7,:,",",X))') omega_pe_div_omega_ce_input,k_para_c_div_omega_ci_input, k_per_c_div_omega_ci_input,real(ans_z_solve(n)),imag(ans_z_solve(n)),ans_mul_solve(n),eigen,polar(1),polar(2),polar(3)
+						write(fid,'(*(G30.7,:,",",X))') omega_pe_div_omega_ce_input,c_div_v_para_input,k_para_rho_i_para_input, k_per_rho_i_para_input,real(ans_z_solve(n)),imag(ans_z_solve(n)),ans_mul_solve(n),eigen,polar(1),polar(2),polar(3)
 					end if
 				end do
 				deallocate(ans_z_solve)
