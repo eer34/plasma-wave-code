@@ -2288,7 +2288,25 @@ contains
 	dispersion_function_perpendicular=D(1,1)*D(2,2)-D(1,2)*D(2,1)
   
     end function dispersion_function_perpendicular
-    
+
+!-----------------------------------------------------------------------------!
+!     dispersion_function_two_ion_species_perpendicular:dispersion relation with omega as the variable for perpendicular waves in two ion species plasma
+!-----------------------------------------------------------------------------! 
+    complex(wp) function dispersion_function_two_ion_species_perpendicular(x)
+	implicit none
+	complex(wp),intent(in)::x
+	complex(wp)::D(3,3)
+	integer::n,k
+	call dispersion_function_two_ion_species_matrix(x,D)
+	do n=1,3
+	    do k=1,3
+		D(n,k)=D(n,k)/1000
+	    end do
+	end do
+	dispersion_function_two_ion_species_perpendicular=D(1,1)*D(2,2)-D(1,2)*D(2,1)
+  
+    end function dispersion_function_two_ion_species_perpendicular
+
 !-----------------------------------------------------------------------------!
 !     dispersion_function_variable_k_para: dispersion relation with k_para as the variable
 !-----------------------------------------------------------------------------! 
