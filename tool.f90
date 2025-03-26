@@ -2541,7 +2541,53 @@ contains
         mass_ratio=1836.0_wp
         resonance=1/(1/(1-omega_ce_div_x**2)+1/mass_ratio/(1-omega_ce_div_x**2/mass_ratio**2))
     end function resonance
-    
+
+!-----------------------------------------------------------------------------!
+!     left_cut_off_two_ion_species: calculate the left cut off line in two ion species plasma (omega_pe_div_omega_ce_2)
+!-----------------------------------------------------------------------------!  
+    real(wp) function left_cut_off_two_ion_species(omega_ce_div_x)
+		implicit none
+		real(wp),intent(in)::omega_ce_div_x
+		real(wp)::mass_ratio_1,mass_ratio_2
+		mass_ratio_1=1836.0_wp
+		mass_ratio_2=3672.0_wp
+		left_cut_off_two_ion_species=1.0_wp/(omega_ce_div_x+1.0_wp)-1.0_wp/(omega_ce_div_x-mass_ratio_1)/2.0_wp-1.0_wp/(omega_ce_div_x-mass_ratio_2)/2.0_wp
+		if (left_cut_off_two_ion_species==0) then
+			left_cut_off_two_ion_species=1d8
+		else 
+			left_cut_off_two_ion_species=1d0/left_cut_off_two_ion_species
+		end if
+    end function left_cut_off_two_ion_species
+ 
+!-----------------------------------------------------------------------------!
+!     right_cut_off_two_ion_species: calculate the right cut off line in two ion species plasma (omega_pe_div_omega_ce_2)
+!-----------------------------------------------------------------------------!    
+    ! real(wp) function right_cut_off_two_ion_species(omega_ce_div_x)
+	! 	implicit none
+	! 	real(wp),intent(in)::omega_ce_div_x
+	! 	real(wp)::mass_ratio
+	! 	mass_ratio=1836.0_wp
+	! 	right_cut_off=(1+omega_ce_div_x/mass_ratio)*(1-omega_ce_div_x)/(1+1/mass_ratio)
+    ! end function right_cut_off_two_ion_species
+ 
+!-----------------------------------------------------------------------------!
+!     resonance_two_ion_species: calculate the resonance line in two ion species plasma (omega_pe_div_omega_ce_2)
+!-----------------------------------------------------------------------------!  
+    real(wp) function resonance_two_ion_species(omega_ce_div_x)
+		implicit none
+        real(wp),intent(in)::omega_ce_div_x
+        real(wp)::mass_ratio_1,mass_ratio_2
+		mass_ratio_1=1836.0_wp
+        mass_ratio_2=3672.0_wp
+        resonance_two_ion_species=1/(1-omega_ce_div_x**2)+0.5_wp/mass_ratio_1/(1-omega_ce_div_x**2/mass_ratio_1**2)+0.5_wp/mass_ratio_2/(1-omega_ce_div_x**2/mass_ratio_2**2)
+
+		if (resonance_two_ion_species==0) then	
+			resonance_two_ion_species=1d8
+		else
+			resonance_two_ion_species=1d0/resonance_two_ion_species
+		end if
+    end function resonance_two_ion_species
+        
  
 !-----------------------------------------------------------------------------!
 !     test_fun5:test function 5
