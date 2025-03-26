@@ -318,6 +318,137 @@ contains
     end subroutine dispersion_function_parallel_matrix
 
 !-----------------------------------------------------------------------------!
+!     dispersion_function_parallel_two_ion_species_matrix: dispersion matrix of omega for parallel waves in two ion species plasma
+!-----------------------------------------------------------------------------!
+    subroutine dispersion_function_parallel_two_ion_species_matrix(x,D)
+		implicit none
+		complex(wp),intent(in)::x
+		complex(wp),intent(out)::D(:,:)
+		complex(wp)::xi_pdf_1,yi_pdf_1,xi_pdf_2,yi_pdf_2
+		complex(wp)::xe_pdf_1,ye_pdf_1,xe_pdf_2,ye_pdf_2
+		complex(wp)::xd_pdf_1,yd_pdf_1,xd_pdf_2,yd_pdf_2
+		complex(wp)::x_e,x_d
+		x_e=-x/1836
+		x_d=2*x
+		ratio_ti=1
+		ratio_te=1
+		xi_pdf_1=(x-(1,0))/k_para_rho_i_para
+		call pdf(xi_pdf_1,yi_pdf_1)
+		xi_pdf_2=(x+(1,0))/k_para_rho_i_para
+		call pdf(xi_pdf_2,yi_pdf_2)
+		
+		xe_pdf_1=(x_e-(1,0))/k_para_rho_e_para
+		call pdf(xe_pdf_1,ye_pdf_1)
+		xe_pdf_2=(x_e+(1,0))/k_para_rho_e_para
+		call pdf(xe_pdf_2,ye_pdf_2)
+		
+		xd_pdf_1=(x_d-(1,0))/k_para_rho_d_para
+		call pdf(xd_pdf_1,yd_pdf_1)
+		xd_pdf_2=(x_d+(1,0))/k_para_rho_d_para
+		call pdf(xd_pdf_2,yd_pdf_2)
+		
+		D(1,1)=1-c_div_v_para*k_para_rho_i_para**2/x**2+0.5*omega_pi_div_omega_ci/x*(yi_pdf_1/k_para_rho_i_para+(ratio_ti-1)*(1+xi_pdf_1*yi_pdf_1)/x)&
+		&+0.5*omega_pi_div_omega_ci/x*(yi_pdf_2/k_para_rho_i_para+(ratio_ti-1)*(1+xi_pdf_2*yi_pdf_2)/x)&
+		&+0.5*omega_pe_div_omega_ce/x_e*(ye_pdf_1/k_para_rho_e_para+(ratio_te-1)*(1+xe_pdf_1*ye_pdf_1)/x)&
+		&+0.5*omega_pe_div_omega_ce/x_e*(ye_pdf_2/k_para_rho_e_para+(ratio_te-1)*(1+xe_pdf_2*ye_pdf_2)/x)&
+		&+0.5*omega_pd_div_omega_cd/x_d*(yd_pdf_1/k_para_rho_d_para)&
+		&+0.5*omega_pd_div_omega_cd/x_d*(yd_pdf_2/k_para_rho_d_para)
+		D(1,2)=0.5*(0,1)*omega_pi_div_omega_ci/x*(yi_pdf_1/k_para_rho_i_para+(ratio_ti-1)*(1+xi_pdf_1*yi_pdf_1)/x-yi_pdf_2/k_para_rho_i_para-(ratio_ti-1)*(1+xi_pdf_2*yi_pdf_2)/x)&
+		&+0.5*(0,1)*omega_pe_div_omega_ce/x_e*(ye_pdf_1/k_para_rho_e_para+(ratio_te-1)*(1+xe_pdf_1*ye_pdf_1)/x_e-ye_pdf_2/k_para_rho_e_para-(ratio_te-1)*(1+xe_pdf_2*ye_pdf_2)/x_e)&
+		&+0.5*(0,1)*omega_pd_div_omega_cd/x_d*(yd_pdf_1/k_para_rho_d_para-yd_pdf_2/k_para_rho_d_para)
+		D(1,3)=0
+		D(2,1)=-D(1,2)
+		D(2,2)=D(1,1)
+		D(2,3)=0
+		D(3,1)=0
+		D(3,2)=0
+		xi_pdf_1=x/k_para_rho_i_para
+		xe_pdf_1=x_e/k_para_rho_e_para
+		xd_pdf_1=x_d/k_para_rho_d_para
+		call pdf(xi_pdf_1,yi_pdf_1)
+		call pdf(xe_pdf_1,ye_pdf_1) 
+		call pdf(xd_pdf_1,yd_pdf_1) 
+		D(3,3)=1+2*omega_pi_div_omega_ci/k_para_rho_i_para**2*(1+xi_pdf_1*yi_pdf_1)+2*omega_pe_div_omega_ce/k_para_rho_e_para**2*(1+xe_pdf_1*ye_pdf_1)+2*omega_pd_div_omega_cd/k_para_rho_d_para**2*(1+xd_pdf_1*yd_pdf_1)
+		
+	
+		
+	end subroutine dispersion_function_parallel_two_ion_species_matrix
+	
+
+!-----------------------------------------------------------------------------!
+!     dispersion_function_parallel_two_ion_species:dispersion relation with omega as the variable for parallel waves in two ion species plasma
+!-----------------------------------------------------------------------------! 
+    complex(wp) function dispersion_function_parallel_two_ion_species(x)
+	implicit none
+	complex(wp),intent(in)::x
+	complex(wp)::D(3,3)
+	integer::n,k
+	call dispersion_function_parallel_two_ion_species_matrix(x,D)
+	do n=1,3
+	    do k=1,3
+		D(n,k)=D(n,k)/1000
+	    end do
+	end do
+	dispersion_function_parallel_two_ion_species=det(D,3)
+  
+    end function dispersion_function_parallel_two_ion_species
+
+
+!-----------------------------------------------------------------------------!
+!     dispersion_function_parallel_two_ion_species_1:dispersion relation with omega as the variable for left waves in two ion species plasma
+!-----------------------------------------------------------------------------! 
+    complex(wp) function dispersion_function_parallel_two_ion_species_1(x)
+	implicit none
+	complex(wp),intent(in)::x
+	complex(wp)::D(3,3)
+	integer::n,k
+	call dispersion_function_parallel_two_ion_species_matrix(x,D)
+	do n=1,3
+	    do k=1,3
+		D(n,k)=D(n,k)/1000
+	    end do
+	end do
+	dispersion_function_parallel_two_ion_species_1=D(1,1)+(0,1)*D(1,2)
+  
+    end function dispersion_function_parallel_two_ion_species_1
+
+!-----------------------------------------------------------------------------!
+!     dispersion_function_parallel_two_ion_species_2:dispersion relation with omega as the variable for right waves in two ion species plasma
+!-----------------------------------------------------------------------------! 
+    complex(wp) function dispersion_function_parallel_two_ion_species_2(x)
+	implicit none
+	complex(wp),intent(in)::x
+	complex(wp)::D(3,3)
+	integer::n,k
+	call dispersion_function_parallel_two_ion_species_matrix(x,D)
+	do n=1,3
+	    do k=1,3
+		D(n,k)=D(n,k)/1000
+	    end do
+	end do
+	dispersion_function_parallel_two_ion_species_2=D(1,1)-(0,1)*D(1,2)
+  
+    end function dispersion_function_parallel_two_ion_species_2
+
+!-----------------------------------------------------------------------------!
+!     dispersion_function_parallel_two_ion_species_3:dispersion relation with omega as the variable for right waves in two ion species plasma
+!-----------------------------------------------------------------------------! 
+    complex(wp) function dispersion_function_parallel_two_ion_species_3(x)
+	implicit none
+	complex(wp),intent(in)::x
+	complex(wp)::D(3,3)
+	integer::n,k
+	call dispersion_function_parallel_two_ion_species_matrix(x,D)
+	do n=1,3
+	    do k=1,3
+		D(n,k)=D(n,k)/1000
+	    end do
+	end do
+	dispersion_function_parallel_two_ion_species_3=D(3,3)
+  
+    end function dispersion_function_parallel_two_ion_species_3
+
+!-----------------------------------------------------------------------------!
 !     dispersion_function_parallel_matrix_variable_k_para: the dispersion matrix of k_para with known omega for parallel waves.
 !-----------------------------------------------------------------------------!
     subroutine dispersion_function_parallel_matrix_variable_k_para(x,D)
@@ -386,29 +517,29 @@ contains
 		    if(abs(k_para_rho_i_para)<1e-6) then
 		      !series_sum_1=series_sum_1+0.5*gamma_n*(n**2/k_per_rho_i_per**2/((cmplx(n,0)-x)))
 		      !series_sum_1=series_sum_1+0.5*gamma_n*(n**2/k_per_rho_i_per**2/((cmplx(-n,0)-x)))
-		      series_sum_1=series_sum_1+4/k_per_rho_i_per**2*omega_pi_div_omega_ci*gamma_n*(n**2/(cmplx(n**2,0)-x**2))
-		      series_sum_1=series_sum_1+4/k_per_rho_e_per**2*omega_pe_div_omega_ce*gamma_n1*(n**2/(cmplx(n**2,0)-x_e**2))
+				series_sum_1=series_sum_1+4/k_per_rho_i_per**2*omega_pi_div_omega_ci*gamma_n*(n**2/(cmplx(n**2,0)-x**2))
+				series_sum_1=series_sum_1+4/k_per_rho_e_per**2*omega_pe_div_omega_ce*gamma_n1*(n**2/(cmplx(n**2,0)-x_e**2))
 		    else
-		      x_pdf=(x-cmplx(n,0))/k_para_rho_i_para
-		      call pdf(x_pdf,y_pdf)
-		      
-		      series_sum_1=series_sum_1+2*omega_pi_div_omega_ci/x*gamma_n*(n**2/k_per_rho_i_per**2/k_para_rho_i_para*y_pdf+n**2/x*(1/k_per_rho_i_para**2-1/k_per_rho_i_per**2)*(1+x_pdf*y_pdf))
-		      
-		      x_pdf=(x+cmplx(n,0))/k_para_rho_i_para
-		      call pdf(x_pdf,y_pdf)
-		    
-		      series_sum_1=series_sum_1+2*omega_pi_div_omega_ci/x*gamma_n*(n**2/k_per_rho_i_per**2/k_para_rho_i_para*y_pdf+n**2/x*(1/k_per_rho_i_para**2-1/k_per_rho_i_per**2)*(1+x_pdf*y_pdf))
-		      
-		      
-		      x_pdf=(x_e-cmplx(n,0))/k_para_rho_e_para
-		      call pdf(x_pdf,y_pdf)
-		      
-		      series_sum_1=series_sum_1+2*omega_pe_div_omega_ce/x_e*gamma_n1*(n**2/k_per_rho_e_per**2/k_para_rho_e_para*y_pdf+n**2/x_e*(1/k_per_rho_e_para**2-1/k_per_rho_e_per**2)*(1+x_pdf*y_pdf))
-		      
-		      x_pdf=(x_e+cmplx(n,0))/k_para_rho_e_para
-		      call pdf(x_pdf,y_pdf)
-		    
-		      series_sum_1=series_sum_1+2*omega_pe_div_omega_ce/x_e*gamma_n1*(n**2/k_per_rho_e_per**2/k_para_rho_e_para*y_pdf+n**2/x_e*(1/k_per_rho_e_para**2-1/k_per_rho_e_per**2)*(1+x_pdf*y_pdf))
+				x_pdf=(x-cmplx(n,0))/k_para_rho_i_para
+				call pdf(x_pdf,y_pdf)
+				
+				series_sum_1=series_sum_1+2*omega_pi_div_omega_ci/x*gamma_n*(n**2/k_per_rho_i_per**2/k_para_rho_i_para*y_pdf+n**2/x*(1/k_per_rho_i_para**2-1/k_per_rho_i_per**2)*(1+x_pdf*y_pdf))
+				
+				x_pdf=(x+cmplx(n,0))/k_para_rho_i_para
+				call pdf(x_pdf,y_pdf)
+				
+				series_sum_1=series_sum_1+2*omega_pi_div_omega_ci/x*gamma_n*(n**2/k_per_rho_i_per**2/k_para_rho_i_para*y_pdf+n**2/x*(1/k_per_rho_i_para**2-1/k_per_rho_i_per**2)*(1+x_pdf*y_pdf))
+				
+				
+				x_pdf=(x_e-cmplx(n,0))/k_para_rho_e_para
+				call pdf(x_pdf,y_pdf)
+				
+				series_sum_1=series_sum_1+2*omega_pe_div_omega_ce/x_e*gamma_n1*(n**2/k_per_rho_e_per**2/k_para_rho_e_para*y_pdf+n**2/x_e*(1/k_per_rho_e_para**2-1/k_per_rho_e_per**2)*(1+x_pdf*y_pdf))
+				
+				x_pdf=(x_e+cmplx(n,0))/k_para_rho_e_para
+				call pdf(x_pdf,y_pdf)
+				
+				series_sum_1=series_sum_1+2*omega_pe_div_omega_ce/x_e*gamma_n1*(n**2/k_per_rho_e_per**2/k_para_rho_e_para*y_pdf+n**2/x_e*(1/k_per_rho_e_para**2-1/k_per_rho_e_per**2)*(1+x_pdf*y_pdf))
 		      
 		    end if
 		    
@@ -2472,9 +2603,10 @@ contains
 	complex(wp)::D(3,3),w(3),vl(3,3),vr(3,3)
 	integer::n,k,info,e_min
 	complex(wp)::y
-    y=x*omega_div_omega_ci/(c_div_v_para)**(0.5)
-	y=(1.0,1.0)*y/(2.0_wp)**(0.5)
-	call  dispersion_function_parallel_matrix_variable_k_para(y,D)
+    ! y=x*omega_div_omega_ci/(c_div_v_para)**(0.5)
+	! y=(1.0,1.0)*y/(2.0_wp)**(0.5)
+	y=x
+	call  dispersion_function_parallel_two_ion_species_matrix(y,D)
    
     do n=1,3
 	  do k=1,3
