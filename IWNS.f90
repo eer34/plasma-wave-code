@@ -58,7 +58,7 @@ program IWNS
         allocate(x_wave_cma_x(110))
         allocate(x_wave_cma_y(110))
         do k=1,kmax
-            omega_pe_div_omega_ce_input=0.0001_wp*k
+            omega_pe_div_omega_ce_input=10**(-7+k*0.1)
             direction=1
             k_para_rho_i_para_input=0.0_wp
             wave_max_real_last=0.0_wp
@@ -79,9 +79,9 @@ program IWNS
                 wave_max_real=1.0_wp
                 wave_max_imag=-0.0_wp
                 least_damped_ratio=100000.0_wp
-                left_edge=0.6_wp
-                right_edge=1.01_wp
-                up_edge=0.2_wp 
+                left_edge=0.01_wp
+                right_edge=0.51_wp
+                up_edge=0.205_wp 
                 down_edge=-2*k_para_rho_d_para_input
                 
                 allocate(ans_z_solve(n_error))
