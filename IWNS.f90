@@ -39,10 +39,10 @@ program IWNS
     n_circle=400
     n_line=400
     epsilon_0=0.1_wp
-    kmax=4
+    kmax=9
     if (my_id==0) then
-          open(fid_process,file='langmuir_wave_boundary_output_in_process.csv')
-        open(fid, file='langmuir_wave_boundary.csv')
+          open(fid_process,file='left_wave_boundary_output_in_process.csv')
+        open(fid, file='left_wave_boundary.csv')
     end if
     ti_div_te=1.0_wp
     
@@ -58,7 +58,7 @@ program IWNS
         allocate(x_wave_cma_x(110))
         allocate(x_wave_cma_y(110))
         do k=1,kmax
-            omega_pe_div_omega_ce_input=0.000001_wp*k
+            omega_pe_div_omega_ce_input=0.0001_wp*k
             direction=1
             k_para_rho_i_para_input=0.0_wp
             wave_max_real_last=0.0_wp
@@ -79,8 +79,8 @@ program IWNS
                 wave_max_real=1.0_wp
                 wave_max_imag=-0.0_wp
                 least_damped_ratio=100000.0_wp
-                left_edge=1.5_wp
-                right_edge=11.5_wp
+                left_edge=0.6_wp
+                right_edge=1.01_wp
                 up_edge=0.2_wp 
                 down_edge=-2*k_para_rho_d_para_input
                 
@@ -89,7 +89,7 @@ program IWNS
                 allocate(ans_z_error(n_error))
                 allocate(ans_f_solve(n_error))
 
-                call zero_pole_location(dispersion_function_parallel_two_ion_species_3,ierr,left_edge,right_edge,down_edge,up_edge,kc_square,epsilon_i,epsilon_accuracy_limit,n_circle,n_line,epsilon_0,z_solve_number,ans_z_solve,ans_mul_solve,ans_z_error,ans_f_solve)
+                call zero_pole_location(dispersion_function_parallel_two_ion_species_2,ierr,left_edge,right_edge,down_edge,up_edge,kc_square,epsilon_i,epsilon_accuracy_limit,n_circle,n_line,epsilon_0,z_solve_number,ans_z_solve,ans_mul_solve,ans_z_error,ans_f_solve)
                 do n=1,z_solve_number
                     if (abs(aimag(ans_z_solve(n)))<least_damped_ratio*real(ans_z_solve(n))) then
                         wave_max_imag=aimag(ans_z_solve(n))
@@ -105,7 +105,7 @@ program IWNS
                 if (my_id==0) then
                     write(fid_process,'(*(G30.7,:,",",X))') omega_pe_div_omega_ce_input, direction,k_para_rho_i_para_input,wave_max_real,wave_max_imag
                 end if
-                if(wave_max_real>1.0) then    
+                if(wave_max_real<1.0) then    
                     if (direction*abs(wave_max_imag)>0.01*direction*abs(wave_max_real)) then
 						direction=-(direction+abs(direction))/2
 					
