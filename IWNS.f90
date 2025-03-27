@@ -12,129 +12,118 @@ program IWNS
     real(wp),allocatable::ans_z_error(:)
     complex(wp),allocatable::ans_f_solve(:)
     integer::n_circle,n_line,n_error
-    real(wp)::ti_div_te
-    real(wp)::c_div_v_para_input,omega_pe_div_omega_ce_input,k_para_rho_i_para_input,k_para_rho_e_para_input,k_para_rho_e_per_input,k_per_rho_i_para_input,k_per_rho_i_per_input,k_per_rho_e_para_input,k_per_rho_e_per_input
-    real(wp)::k_para_rho_d_para_input,k_per_rho_d_para_input,k_per_rho_d_per_input
-    real(wp)::k_para_c_div_omega_ci
-    integer::fid_process,fid,n,k,region_i
+    real(wp)::c_div_v_para_input,omega_pe_div_omega_ce_input,omega_div_omega_ci_input,k_per_rho_i_input,k_para_rho_i_input
+    real(wp)::refractive_para,omega_pe_div_omega_square,omega_ce_div_omega
+    integer::fid,n,k,region_i
     integer::ierr,my_id,num_procs
     real(wp)::start_cpu_time,finish_cpu_time
     real(wp)::eigen
     complex(wp)::polar(3)
-    real(wp),allocatable::x_wave_cma_x(:),x_wave_cma_y(:)
-    integer::direction,kmax,ti_number
-    real(wp)::ti
-    real(wp)::wave_max_imag, wave_max_real, wave_max_real_last, least_damped_ratio
     call mpi_init(ierr)
     call mpi_comm_rank(mpi_comm_world,my_id,ierr)
     call mpi_comm_size(mpi_comm_world,num_procs,ierr)
     call cpu_time(start_cpu_time)
 
     fid=10
-    fid_process=1
     n_error=1000
     kc_square=128.0_wp
     epsilon_i=1d-7
-    epsilon_accuracy_limit=1d-6
+    epsilon_accuracy_limit=1d-5
     n_circle=400
     n_line=400
     epsilon_0=0.1_wp
-    kmax=9
+    
     if (my_id==0) then
-          open(fid_process,file='left_wave_boundary_output_in_process.csv')
-        open(fid, file='left_wave_boundary.csv')
+          open(fid,file='output.csv')
     end if
-    ti_div_te=1.0_wp
+    c_div_v_para_input=470000.0_wp
     
-    k_per_rho_i_para_input=0.0_wp
-    k_per_rho_i_per_input=0.0_wp
-    k_per_rho_e_para_input=0.0_wp
-    k_per_rho_e_per_input=0.0_wp
-    k_per_rho_d_para_input=0.0_wp
-    k_per_rho_d_per_input=0.0_wp
-    do ti_number=1,1
-        ti=ti_number*1.0_wp
-        c_div_v_para_input=470000.0_wp/ti
-        allocate(x_wave_cma_x(110))
-        allocate(x_wave_cma_y(110))
-        do k=1,kmax
-            omega_pe_div_omega_ce_input=10**(-7+k*0.1)
-            direction=1
-            k_para_rho_i_para_input=0.0_wp
-            wave_max_real_last=0.0_wp
-            do while (direction/=0)
-                if (direction==1) then
-                    k_para_rho_i_para_input=k_para_rho_i_para_input+0.001_wp
-                else if (direction==-1) then
-                    k_para_rho_i_para_input=k_para_rho_i_para_input-0.0001_wp
-                end if 
-                if (k_para_rho_i_para_input<=0) then
-                    wave_max_real=100.0_wp
-                    exit
-                end if
-                k_para_rho_e_para_input=-k_para_rho_i_para_input*(1.0_wp/1836.0_wp/ti_div_te)**(0.5)
-                k_para_rho_d_para_input=k_para_rho_i_para_input*(2.0_wp)**(0.5)
-                call set_parameter_two_ion_species(c_div_v_para_input,omega_pe_div_omega_ce_input,k_para_rho_i_para_input,k_per_rho_i_para_input,k_per_rho_i_per_input,k_para_rho_e_para_input,k_per_rho_e_para_input,k_per_rho_e_per_input,k_para_rho_d_para_input,k_per_rho_d_para_input,k_per_rho_d_per_input)
-
-                wave_max_real=1.0_wp
-                wave_max_imag=-0.0_wp
-                least_damped_ratio=100000.0_wp
-                left_edge=0.01_wp
-                right_edge=0.51_wp
-                up_edge=0.205_wp 
-                down_edge=-2*k_para_rho_d_para_input
-                
-                allocate(ans_z_solve(n_error))
-                allocate(ans_mul_solve(n_error))
-                allocate(ans_z_error(n_error))
-                allocate(ans_f_solve(n_error))
-
-                call zero_pole_location(dispersion_function_parallel_two_ion_species_2,ierr,left_edge,right_edge,down_edge,up_edge,kc_square,epsilon_i,epsilon_accuracy_limit,n_circle,n_line,epsilon_0,z_solve_number,ans_z_solve,ans_mul_solve,ans_z_error,ans_f_solve)
-                do n=1,z_solve_number
-                    if (abs(aimag(ans_z_solve(n)))<least_damped_ratio*real(ans_z_solve(n))) then
-                        wave_max_imag=aimag(ans_z_solve(n))
-                        wave_max_real=real(ans_z_solve(n))
-                        least_damped_ratio=abs(wave_max_imag)/wave_max_real
-                    end if 
-                end do
-                deallocate(ans_z_solve)
-                deallocate(ans_mul_solve)
-                deallocate(ans_z_error)
-                deallocate(ans_f_solve)
-                
-                if (my_id==0) then
-                    write(fid_process,'(*(G30.7,:,",",X))') omega_pe_div_omega_ce_input, direction,k_para_rho_i_para_input,wave_max_real,wave_max_imag
-                end if
-                if(wave_max_real<1.0) then    
-                    if (direction*abs(wave_max_imag)>0.01*direction*abs(wave_max_real)) then
-						direction=-(direction+abs(direction))/2
-					
-						if (direction==0) then
-							wave_max_real=(wave_max_real+wave_max_real_last)/2
-						end if 
-						
-					end if
-   
-                    wave_max_real_last=wave_max_real
-                end if
-            end do
-            x_wave_cma_x(k)=1836**2*omega_pe_div_omega_ce_input/wave_max_real**2  
-            x_wave_cma_y(k)=1836.0_wp/wave_max_real
-            if (my_id==0) then
-                write(fid,'(*(G30.7,:,",",X))')  ti, x_wave_cma_x(k) ,x_wave_cma_y(k)					
-            end if
-        end do
+    do k=1,80
+        omega_pe_div_omega_square=6000.0_wp
+        omega_ce_div_omega=2800.0_wp
+        omega_pe_div_omega_ce_input=omega_pe_div_omega_square/omega_ce_div_omega/omega_ce_div_omega
+        omega_div_omega_ci_input=1836.0_wp/omega_ce_div_omega
+        refractive_para=0.05_wp*(k-1)
+        k_para_rho_i_input=refractive_para*omega_div_omega_ci_input/(c_div_v_para_input)**(0.5)
         
-        deallocate(x_wave_cma_x)
-        deallocate(x_wave_cma_y)
+        call set_parameter_variable_k_per_two_ion_species(c_div_v_para_input,omega_pe_div_omega_ce_input,omega_div_omega_ci_input,k_para_rho_i_input)
+        do region_i=1,15
+            if (region_i==1) then
+                left_edge=0.01_wp
+                right_edge=1.01_wp
+                down_edge=-0.19_wp
+                up_edge=0.21_wp 
+            else
+                left_edge=1.01_wp+(region_i-2)*40.0_wp
+                right_edge=left_edge+40.0_wp
+                down_edge=-0.9_wp-1.0_wp*(region_i-2)
+                up_edge=1.1_wp+1.0_wp*(region_i-2)
+            end if
+
+            allocate(ans_z_solve(n_error))
+            allocate(ans_mul_solve(n_error))
+            allocate(ans_z_error(n_error))
+            allocate(ans_f_solve(n_error))
+    
+            call zero_pole_location(dispersion_function_variable_k_per_two_ion_species,ierr,left_edge,right_edge,down_edge,up_edge,kc_square,epsilon_i,epsilon_accuracy_limit,n_circle,n_line,epsilon_0,z_solve_number,ans_z_solve,ans_mul_solve,ans_z_error,ans_f_solve)
+            
+            if (my_id==0) then
+                do n=1,z_solve_number
+                    write(*,*),n,':'
+                    write(*,*),'ans_z_solve are',ans_z_solve(n)
+                    write(*,*),'ans_mul_solve are',ans_mul_solve(n)
+                    write(*,*),'ans_z_error are',ans_z_error(n)
+                    write(*,*),'ans_f_solve are',ans_f_solve(n)
+                    call polarization(ans_z_solve(n),eigen,polar)
+                    write(fid,'(*(G30.7,:,",",X))') omega_pe_div_omega_square,omega_ce_div_omega,refractive_para,real(ans_z_solve(n)),aimag(ans_z_solve(n)),ans_mul_solve(n),ans_z_error(n),abs(ans_f_solve(n)),eigen,polar(1),polar(2),polar(3)
+                    
+                end do
+            end if
+            deallocate(ans_z_solve)
+            deallocate(ans_mul_solve)
+            deallocate(ans_z_error)
+            deallocate(ans_f_solve)
+        end do
     end do
-    call cpu_time(finish_cpu_time)
+    
+    k_per_rho_i_input=0.0_wp
+    call set_parameter_variable_k_para_two_ion_species(c_div_v_para_input,omega_pe_div_omega_ce_input,omega_div_omega_ci_input,k_per_rho_i_input)
+    left_edge=0.1_wp
+    right_edge=10.0_wp
+    down_edge=-10.0_wp
+    up_edge=-0.1_wp
+
+    allocate(ans_z_solve(n_error))
+    allocate(ans_mul_solve(n_error))
+    allocate(ans_z_error(n_error))
+    allocate(ans_f_solve(n_error))
+
+    call zero_pole_location(dispersion_function_parallel_variable_k_para_two,ierr,left_edge,right_edge,down_edge,up_edge,kc_square,epsilon_i,epsilon_accuracy_limit,n_circle,n_line,epsilon_0,z_solve_number,ans_z_solve,ans_mul_solve,ans_z_error,ans_f_solve)
     
     if (my_id==0) then
-        write(*,*),'running time is',finish_cpu_time-start_cpu_time
-        close(fid_process)
+        do n=1,z_solve_number
+        call polarization_2(ans_z_solve(n),eigen,polar)
+        ans_z_solve(n)=(1,1)*ans_z_solve(n)/(2.0_wp)**(0.5)
+        write(*,*),n,':'
+        write(*,*),'ans_z_solve are',ans_z_solve(n)
+        write(*,*),'ans_mul_solve are',ans_mul_solve(n)
+        write(*,*),'ans_z_error are',ans_z_error(n)
+        write(*,*),'ans_f_solve are',ans_f_solve(n)
+        
+        write(fid,'(*(G30.7,:,",",X))') omega_pe_div_omega_square,omega_ce_div_omega,k_per_rho_i_input,real(ans_z_solve(n)),aimag(ans_z_solve(n)),ans_mul_solve(n),ans_z_error(n),abs(ans_f_solve(n)),eigen,polar(1),polar(2),polar(3)
+    
+        end do
+    end if
+    deallocate(ans_z_solve)
+    deallocate(ans_mul_solve)
+    deallocate(ans_z_error)
+    deallocate(ans_f_solve)
+    
+    
+    call cpu_time(finish_cpu_time)
+    if (my_id==0) then
         close(fid)
+        write(*,*),'running time is',finish_cpu_time-start_cpu_time
     end if
     call mpi_finalize(ierr)
    end program IWNS
-

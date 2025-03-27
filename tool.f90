@@ -12,11 +12,11 @@
  private c_div_v_para,omega_div_omega_ci,omega_div_omega_ce,omega_pi_div_omega_ci,omega_pe_div_omega_ce,ratio_ti,ratio_te,refractive_para
  private k_para_rho_i_para,k_per_rho_i_para,k_per_rho_i_per,k_para_rho_e_para,k_para_rho_e_per,k_per_rho_e_para,k_per_rho_e_per
  private omega_pd_div_omega_cd, k_para_c_div_omega_ci,k_per_c_div_omega_ci
- private k_para_rho_d_para,k_per_rho_d_para,k_per_rho_d_per
+ private k_para_rho_d_para,k_per_rho_d_para,k_per_rho_d_per,omega_div_omega_cd
  real(wp)::c_div_v_para,omega_div_omega_ci,omega_div_omega_ce,omega_pi_div_omega_ci,omega_pe_div_omega_ce,k_per_rho_e_per,ratio_ti,ratio_te,refractive_para
  real(wp)::k_para_rho_i_para,k_per_rho_i_para,k_per_rho_i_per,k_para_rho_e_para,k_para_rho_e_per,k_per_rho_e_para
  real(wp):: omega_pd_div_omega_cd, k_para_c_div_omega_ci,k_per_c_div_omega_ci
- real(wp):: k_para_rho_d_para,k_per_rho_d_para,k_per_rho_d_per
+ real(wp):: k_para_rho_d_para,k_per_rho_d_para,k_per_rho_d_per,omega_div_omega_cd
 contains
 
 !-----------------------------------------------------------------------------!
@@ -185,7 +185,32 @@ contains
     k_per_rho_e_per=-k_per_rho_i_input/(mass_ratio)**(0.5)
     k_per_rho_e_para=-k_per_rho_i_input/(mass_ratio)**(0.5)
     end subroutine set_parameter_variable_k_para
-    
+
+!-----------------------------------------------------------------------------!
+!     set_parameter_variable_k_para_two_ion_species:given omega k_perp to calculate k_para in two ion species plasma
+!-----------------------------------------------------------------------------!    
+    subroutine set_parameter_variable_k_para_two_ion_species(c_div_v_para_input,omega_pe_div_omega_ce_input,omega_div_omega_ci_input,k_per_rho_i_input)
+		implicit none
+		real(wp),intent(in)::c_div_v_para_input,omega_pe_div_omega_ce_input,omega_div_omega_ci_input,k_per_rho_i_input
+		real(wp)::mass_ratio_1,mass_ratio_2
+		mass_ratio_1=1836.0_wp
+		mass_ratio_2=3672.0_wp
+		c_div_v_para=c_div_v_para_input
+		omega_div_omega_ci=omega_div_omega_ci_input
+		omega_div_omega_ce=-omega_div_omega_ci_input/mass_ratio_1
+		omega_div_omega_cd=omega_div_omega_ci_input*mass_ratio_2/mass_ratio_1
+		omega_pe_div_omega_ce=omega_pe_div_omega_ce_input
+		omega_pi_div_omega_ci=omega_pe_div_omega_ce_input*mass_ratio_1/2
+		omega_pd_div_omega_cd=omega_pe_div_omega_ce_input*mass_ratio_2/2
+		
+		k_per_rho_i_para=k_per_rho_i_input
+		k_per_rho_i_per=k_per_rho_i_input
+		k_per_rho_e_per=-k_per_rho_i_input/(mass_ratio_1)**(0.5)
+		k_per_rho_e_para=-k_per_rho_i_input/(mass_ratio_1)**(0.5)
+		k_per_rho_d_per=k_per_rho_i_input*(mass_ratio_2/mass_ratio_1)**(0.5)
+		k_per_rho_d_para=k_per_rho_i_input*(mass_ratio_2/mass_ratio_1)**(0.5)
+		end subroutine set_parameter_variable_k_para_two_ion_species
+		
 !-----------------------------------------------------------------------------!
 !     set_parameter_variable_k_per:given omega and k_para to calculate k_perp
 !-----------------------------------------------------------------------------!    
@@ -204,6 +229,26 @@ contains
 
     end subroutine set_parameter_variable_k_per   
     
+!-----------------------------------------------------------------------------!
+!     set_parameter_variable_k_per_two_ion_species:given omega and k_para to calculate k_perp for two ion species plasma
+!-----------------------------------------------------------------------------!    
+    subroutine set_parameter_variable_k_per_two_ion_species(c_div_v_para_input,omega_pe_div_omega_ce_input,omega_div_omega_ci_input,k_para_rho_i_input)
+		implicit none
+		real(wp),intent(in)::c_div_v_para_input,omega_pe_div_omega_ce_input,omega_div_omega_ci_input,k_para_rho_i_input
+		real(wp)::mass_ratio_1,mass_ratio_2
+		mass_ratio_1=1836.0_wp
+		mass_ratio_2=3672.0_wp
+		c_div_v_para=c_div_v_para_input
+		omega_div_omega_ci=omega_div_omega_ci_input
+		omega_div_omega_ce=-omega_div_omega_ci_input/mass_ratio_1
+		omega_div_omega_cd=omega_div_omega_ci_input*mass_ratio_2/mass_ratio_1
+		omega_pe_div_omega_ce=omega_pe_div_omega_ce_input
+		omega_pi_div_omega_ci=omega_pe_div_omega_ce_input*mass_ratio_1/2
+		omega_pd_div_omega_cd=omega_pe_div_omega_ce_input*mass_ratio_2/2
+		k_para_rho_i_para=k_para_rho_i_input
+		k_para_rho_e_para=-k_para_rho_i_input/(mass_ratio_1)**(0.5)
+		k_para_rho_d_para=-k_para_rho_i_input*(mass_ratio_2/mass_ratio_1)**(0.5)
+		end subroutine set_parameter_variable_k_per_two_ion_species  
 
 !-----------------------------------------------------------------------------!
 !     set_parameter_cold_variable_k_per:cold plasma dispersion relation, given n_para and omega to calculate n_perp
@@ -492,6 +537,62 @@ contains
     
     end subroutine dispersion_function_parallel_matrix_variable_k_para
     
+!-----------------------------------------------------------------------------!
+!     dispersion_function_parallel_matrix_variable_k_para_two: the dispersion matrix of k_para with known omega for parallel waves in two ion species plasma.
+!-----------------------------------------------------------------------------!
+    subroutine dispersion_function_parallel_matrix_variable_k_para_two(x,D)
+		implicit none
+		complex(wp),intent(in)::x
+		complex(wp),intent(out)::D(:,:)
+		complex(wp)::xi_pdf_1,yi_pdf_1,xi_pdf_2,yi_pdf_2
+		complex(wp)::xe_pdf_1,ye_pdf_1,xe_pdf_2,ye_pdf_2
+		complex(wp)::xd_pdf_1,yd_pdf_1,xd_pdf_2,yd_pdf_2
+		complex(wp)::x_e,x_d
+		real(wp)::mass_ratio_1,mass_ratio_2
+		mass_ratio_1=1836.0_wp
+		mass_ratio_2=3672.0_wp
+		x_e=-x/(mass_ratio_1)**(0.5)
+		x_d=x*(mass_ratio_2/mass_ratio_1)**(0.5)
+
+		xi_pdf_1=(omega_div_omega_ci-(1,0))/x
+		call pdf(xi_pdf_1,yi_pdf_1)
+		xi_pdf_2=(omega_div_omega_ci+(1,0))/x
+		call pdf(xi_pdf_2,yi_pdf_2)
+		
+		xe_pdf_1=(omega_div_omega_ce-(1,0))/x_e
+		call pdf(xe_pdf_1,ye_pdf_1)
+		xe_pdf_2=(omega_div_omega_ce+(1,0))/x_e
+		call pdf(xe_pdf_2,ye_pdf_2)
+		
+		xd_pdf_1=(omega_div_omega_cd-(1,0))/x_d
+		call pdf(xd_pdf_1,yd_pdf_1)
+		xd_pdf_2=(omega_div_omega_cd+(1,0))/x_d
+		call pdf(xd_pdf_2,yd_pdf_2)
+		
+		D(1,1)=1-c_div_v_para*x**2/omega_div_omega_ci**2+0.5*omega_pi_div_omega_ci/omega_div_omega_ci*(yi_pdf_1/x)&
+		&+0.5*omega_pi_div_omega_ci/omega_div_omega_ci*(yi_pdf_2/x)&
+		&+0.5*omega_pe_div_omega_ce/omega_div_omega_ce*(ye_pdf_1/x_e)&
+		&+0.5*omega_pe_div_omega_ce/omega_div_omega_ce*(ye_pdf_2/x_e)&
+		&+0.5*omega_pd_div_omega_cd/omega_div_omega_cd*(yd_pdf_1/x_d)&
+		&+0.5*omega_pd_div_omega_cd/omega_div_omega_cd*(yd_pdf_2/x_d)
+		D(1,2)=0.5*(0,1)*omega_pi_div_omega_ci/omega_div_omega_ci*(yi_pdf_1/x-yi_pdf_2/x)&
+		&+0.5*(0,1)*omega_pe_div_omega_ce/omega_div_omega_ce*(ye_pdf_1/x_e-ye_pdf_2/x_e)&
+		&+0.5*(0,1)*omega_pd_div_omega_cd/omega_div_omega_cd*(yd_pdf_1/x_d-yd_pdf_2/x_d)
+		D(1,3)=0
+		D(2,1)=-D(1,2)
+		D(2,2)=D(1,1)
+		D(2,3)=0
+		D(3,1)=0
+		D(3,2)=0
+		xi_pdf_1=omega_div_omega_ci/x
+		xe_pdf_1=omega_div_omega_ce/x_e
+		xd_pdf_1=omega_div_omega_cd/x_d
+		call pdf(xi_pdf_1,yi_pdf_1)
+		call pdf(xe_pdf_1,ye_pdf_1) 
+		call pdf(xd_pdf_1,yd_pdf_1) 
+		D(3,3)=1+2*omega_pi_div_omega_ci/x**2*(1+xi_pdf_1*yi_pdf_1)+2*omega_pe_div_omega_ce/x_e**2*(1+xe_pdf_1*ye_pdf_1)+2*omega_pd_div_omega_cd/x_d**2*(1+xd_pdf_1*yd_pdf_1)
+		
+		end subroutine dispersion_function_parallel_matrix_variable_k_para_two
 !-----------------------------------------------------------------------------!
 !     dispersion_function_matrix:the dispersion matrix for omega with known k.
 !-----------------------------------------------------------------------------!
@@ -1907,7 +2008,408 @@ contains
     end do
     
     end subroutine dispersion_function_matrix_variable_k_per
-    
+
+!-----------------------------------------------------------------------------!
+!     dispersion_function_matrix_k_per_two_ion_species:dipsersion matrix for k_perp with given omega and k_para in two_ion_species plasma
+!-----------------------------------------------------------------------------!
+    subroutine dispersion_function_matrix_variable_k_per_two_ion_species(x,D)
+		implicit none
+		complex(wp),intent(in)::x
+		complex(wp),intent(out)::D(:,:)
+		complex(wp)::series_sum_1,series_sum_2,x_pdf,y_pdf
+		complex(wp)::xe_pdf_1,xe_pdf_2,ye_pdf_1,ye_pdf_2
+		integer::n,k
+		complex(wp)::gamma_n,gamma_n1,gamma_n2
+		complex(wp)::x_e,x_d
+		
+		x_e=-x/(1836)**(0.5)
+		x_d=x*(2.0)**(0.5)
+		do k=1,9
+			select case(k)
+			case(1)
+			series_sum_1=(0,0)
+			series_sum_2=(0,0)
+			do n=1,10
+				gamma_n=bessel_gn_complex(n,x**2/2)
+				gamma_n1=bessel_gn_complex(n,x_e**2/2)
+				gamma_n2=bessel_gn_complex(n,x_d**2/2)
+				if(abs(k_para_rho_i_para)<1e-6) then
+					series_sum_1=series_sum_1+4/x**2*omega_pi_div_omega_ci*gamma_n*(n**2/(cmplx(n**2,0)-omega_div_omega_ci**2))
+					series_sum_1=series_sum_1+4/x_e**2*omega_pe_div_omega_ce*gamma_n1*(n**2/(cmplx(n**2,0)-omega_div_omega_ce**2))
+					series_sum_1=series_sum_1+4/x_d**2*omega_pd_div_omega_cd*gamma_n2*(n**2/(cmplx(n**2,0)-omega_div_omega_cd**2))
+				else
+					x_pdf=(omega_div_omega_ci-cmplx(n,0))/k_para_rho_i_para
+					call pdf(x_pdf,y_pdf)
+					
+					series_sum_1=series_sum_1+2*omega_pi_div_omega_ci/omega_div_omega_ci*gamma_n*(n**2/x**2/k_para_rho_i_para*y_pdf)
+					
+					x_pdf=(omega_div_omega_ci+cmplx(n,0))/k_para_rho_i_para
+					call pdf(x_pdf,y_pdf)
+					
+					series_sum_1=series_sum_1+2*omega_pi_div_omega_ci/omega_div_omega_ci*gamma_n*(n**2/x**2/k_para_rho_i_para*y_pdf)
+					
+					
+					x_pdf=(omega_div_omega_ce-cmplx(n,0))/k_para_rho_e_para
+					call pdf(x_pdf,y_pdf)
+					
+					series_sum_1=series_sum_1+2*omega_pe_div_omega_ce/omega_div_omega_ce*gamma_n1*(n**2/x_e**2/k_para_rho_e_para*y_pdf)
+					
+					x_pdf=(omega_div_omega_ce+cmplx(n,0))/k_para_rho_e_para
+					call pdf(x_pdf,y_pdf)
+					
+					series_sum_1=series_sum_1+2*omega_pe_div_omega_ce/omega_div_omega_ce*gamma_n1*(n**2/x_e**2/k_para_rho_e_para*y_pdf)
+					
+					x_pdf=(omega_div_omega_cd-cmplx(n,0))/k_para_rho_d_para
+					call pdf(x_pdf,y_pdf)
+					
+					series_sum_1=series_sum_1+2*omega_pd_div_omega_cd/omega_div_omega_cd*gamma_n2*(n**2/x_d**2/k_para_rho_d_para*y_pdf)
+					
+					x_pdf=(omega_div_omega_cd+cmplx(n,0))/k_para_rho_d_para
+					call pdf(x_pdf,y_pdf)
+					
+					series_sum_1=series_sum_1+2*omega_pd_div_omega_cd/omega_div_omega_cd*gamma_n2*(n**2/x_d**2/k_para_rho_d_para*y_pdf)
+				end if
+				
+				if(n>=10 .and. abs(series_sum_1-series_sum_2)<1e-8*abs(series_sum_1+series_sum_2) )then
+					exit
+				else if(n==50) then
+					write(*,*) 'The sum of the first 50 series does not converge'
+				end if
+				series_sum_2=series_sum_1
+			end do
+			
+			if (abs(k_para_rho_i_para)<1e-6) then
+				D(1,1)=(1,0)+series_sum_1
+			else
+				D(1,1)=(1,0)-c_div_v_para*k_para_rho_i_para**2/omega_div_omega_ci**2+series_sum_1
+			end if
+			
+		  case(2)
+			series_sum_1=(0,0)
+			series_sum_2=(0,0)
+			do n=1,10
+				if(abs(k_para_rho_i_para)<1e-6) then
+					gamma_n=bessel_gn_complex(n,x**2/2)
+					gamma_n1=bessel_gn_complex(n+1,x**2/2)
+					series_sum_1=series_sum_1+(0,1)*omega_pi_div_omega_ci/omega_div_omega_ci*(2*n**2)/(cmplx(n**2,0)-omega_div_omega_ci**2)*(gamma_n1-(1-2*n/x**2)*gamma_n)
+					gamma_n=bessel_gn_complex(n,x_e**2/2)
+					gamma_n1=bessel_gn_complex(n+1,x_e**2/2)
+					series_sum_1=series_sum_1+(0,1)*omega_pe_div_omega_ce/omega_div_omega_ce*(2*n**2)/(cmplx(n**2,0)-omega_div_omega_ce**2)*(gamma_n1-(1-2*n/x_e**2)*gamma_n)
+					gamma_n=bessel_gn_complex(n,x_d**2/2)
+					gamma_n1=bessel_gn_complex(n+1,x_d**2/2)
+					series_sum_1=series_sum_1+(0,1)*omega_pd_div_omega_cd/omega_div_omega_cd*(2*n**2)/(cmplx(n**2,0)-omega_div_omega_cd**2)*(gamma_n1-(1-2*n/x_d**2)*gamma_n)
+					
+				else
+					gamma_n=bessel_gn_complex(n,x**2/2)
+					gamma_n1=bessel_gn_complex(n+1,x**2/2)
+					x_pdf=(omega_div_omega_ci-cmplx(n,0))/k_para_rho_i_para
+					call pdf(x_pdf,y_pdf)
+					
+					series_sum_1=series_sum_1+cmplx(0,omega_pi_div_omega_ci,wp)/omega_div_omega_ci*(x**2*(gamma_n1-gamma_n)+2*n*gamma_n)*(n/x**2/k_para_rho_i_para*y_pdf)
+					
+					x_pdf=(omega_div_omega_ci+cmplx(n,0))/k_para_rho_i_para
+					call pdf(x_pdf,y_pdf)
+				
+					series_sum_1=series_sum_1-cmplx(0,omega_pi_div_omega_ci,wp)/omega_div_omega_ci*(x**2*(gamma_n1-gamma_n)+2*n*gamma_n)*(n/x**2/k_para_rho_i_para*y_pdf)
+					
+					gamma_n=bessel_gn_complex(n,x_e**2/2)
+					gamma_n1=bessel_gn_complex(n+1,x_e**2/2)
+					x_pdf=(omega_div_omega_ce-cmplx(n,0))/k_para_rho_e_para
+					call pdf(x_pdf,y_pdf)
+					
+					series_sum_1=series_sum_1+cmplx(0,omega_pe_div_omega_ce,wp)/omega_div_omega_ce*(x_e**2*(gamma_n1-gamma_n)+2*n*gamma_n)*(n/x_e**2/k_para_rho_e_para*y_pdf)
+					
+					
+					x_pdf=(omega_div_omega_ce+cmplx(n,0))/k_para_rho_e_para
+					call pdf(x_pdf,y_pdf)
+				
+					series_sum_1=series_sum_1-cmplx(0,omega_pe_div_omega_ce,wp)/omega_div_omega_ce*(x_e**2*(gamma_n1-gamma_n)+2*n*gamma_n)*(n/x_e**2/k_para_rho_e_para*y_pdf)
+					
+					gamma_n=bessel_gn_complex(n,x_d**2/2)
+					gamma_n1=bessel_gn_complex(n+1,x_d**2/2)
+					x_pdf=(omega_div_omega_cd-cmplx(n,0))/k_para_rho_d_para
+					call pdf(x_pdf,y_pdf)
+					
+					series_sum_1=series_sum_1+cmplx(0,omega_pd_div_omega_cd,wp)/omega_div_omega_cd*(x_d**2*(gamma_n1-gamma_n)+2*n*gamma_n)*(n/x_d**2/k_para_rho_d_para*y_pdf)
+					
+					
+					x_pdf=(omega_div_omega_cd+cmplx(n,0))/k_para_rho_d_para
+					call pdf(x_pdf,y_pdf)
+				
+					series_sum_1=series_sum_1-cmplx(0,omega_pd_div_omega_cd,wp)/omega_div_omega_cd*(x_d**2*(gamma_n1-gamma_n)+2*n*gamma_n)*(n/x_d**2/k_para_rho_d_para*y_pdf)
+				end if
+				
+				if(n>=10 .and. abs(series_sum_1-series_sum_2)<1e-8*abs(series_sum_1+series_sum_2) )then
+					exit
+				else if(n==50) then
+					write(*,*) 'The sum of the first 50 series does not converge'
+				end if
+				series_sum_2=series_sum_1
+			end do
+				if (abs(k_para_rho_i_para)<1e-6) then
+					D(1,2)=series_sum_1
+				else
+					D(1,2)=series_sum_1
+				end if
+			  
+			case(3)
+			series_sum_1=(0,0)
+			series_sum_2=(0,0)
+			if(abs(k_para_rho_i_para)<1e-6) then
+			  D(1,3)=(0,0)
+			else
+			   do n=1,10
+				  gamma_n=bessel_gn_complex(n,x**2/2)
+				  x_pdf=(omega_div_omega_ci-cmplx(n,0))/k_para_rho_i_para
+				  call pdf(x_pdf,y_pdf)
+				  series_sum_1=series_sum_1+2*omega_pi_div_omega_ci/omega_div_omega_ci*n*gamma_n*x/k_para_rho_i_para*(1/x**2)*(1+x_pdf*y_pdf)
+				
+				  x_pdf=(omega_div_omega_ci+cmplx(n,0))/k_para_rho_i_para
+				  call pdf(x_pdf,y_pdf)
+				  series_sum_1=series_sum_1-2*omega_pi_div_omega_ci/omega_div_omega_ci*n*gamma_n*x/k_para_rho_i_para*(1/x**2)*(1+x_pdf*y_pdf)
+	
+				  gamma_n=bessel_gn_complex(n,x_e**2/2)
+				  x_pdf=(omega_div_omega_ce-cmplx(n,0))/k_para_rho_e_para
+				  call pdf(x_pdf,y_pdf)
+				  series_sum_1=series_sum_1+2*omega_pe_div_omega_ce/omega_div_omega_ce*n*gamma_n*x_e/k_para_rho_e_para*(1/x_e**2)*(1+x_pdf*y_pdf)
+				
+				  x_pdf=(omega_div_omega_ce+cmplx(n,0))/k_para_rho_e_para
+				  call pdf(x_pdf,y_pdf)
+				  series_sum_1=series_sum_1-2*omega_pe_div_omega_ce/omega_div_omega_ce*n*gamma_n*x_e/k_para_rho_e_para*(1/x_e**2)*(1+x_pdf*y_pdf)
+				  
+				  gamma_n=bessel_gn_complex(n,x_d**2/2)
+				  x_pdf=(omega_div_omega_cd-cmplx(n,0))/k_para_rho_d_para
+				  call pdf(x_pdf,y_pdf)
+				  series_sum_1=series_sum_1+2*omega_pd_div_omega_cd/omega_div_omega_cd*n*gamma_n*x_d/k_para_rho_d_para*(1/x_d**2)*(1+x_pdf*y_pdf)
+				
+				  x_pdf=(omega_div_omega_cd+cmplx(n,0))/k_para_rho_d_para
+				  call pdf(x_pdf,y_pdf)
+				  series_sum_1=series_sum_1-2*omega_pd_div_omega_cd/omega_div_omega_cd*n*gamma_n*x_d/k_para_rho_d_para*(1/x_d**2)*(1+x_pdf*y_pdf)
+				  if(n>=10 .and. abs(series_sum_1-series_sum_2)<1e-8*abs(series_sum_1+series_sum_2) )then
+					  exit
+				  else if(n==50) then
+					  write(*,*) 'The sum of the first 50 series does not converge'
+				  end if
+				  series_sum_2=series_sum_1
+			   end do
+				  D(1,3)=c_div_v_para*k_para_rho_i_para*x/omega_div_omega_ci**2+series_sum_1
+				
+			end if
+			case(4)
+				D(2,1)=-D(1,2)
+			case(5)
+				
+			series_sum_1=(0,0)
+			series_sum_2=(0,0)
+			do n=0,10
+			  
+				if(abs(k_para_rho_i_para)<1e-6) then
+					gamma_n=bessel_gn_complex(n,x**2/2)
+					gamma_n1=bessel_gn_complex(n+1,x**2/2)
+					series_sum_1=series_sum_1+omega_pi_div_omega_ci/omega_div_omega_ci*((x**2-2*n+2*n**2/x**2)*gamma_n-x**2*gamma_n1)/(cmplx(n,0)-omega_div_omega_ci)
+					if(n>0) then
+					series_sum_1=series_sum_1+omega_pi_div_omega_ci/omega_div_omega_ci*((x**2-2*n+2*n**2/x**2)*gamma_n-x**2*gamma_n1)/(cmplx(-n,0)-omega_div_omega_ci)
+					end if
+					gamma_n=bessel_gn_complex(n,x_e**2/2)
+					gamma_n1=bessel_gn_complex(n+1,x_e**2/2)
+					series_sum_1=series_sum_1+omega_pe_div_omega_ce/omega_div_omega_ce*((x_e**2-2*n+2*n**2/x_e**2)*gamma_n-x_e**2*gamma_n1)/(cmplx(n,0)-omega_div_omega_ce)
+					if(n>0) then
+					series_sum_1=series_sum_1+omega_pe_div_omega_ce/omega_div_omega_ce*((x_e**2-2*n+2*n**2/x_e**2)*gamma_n-x_e**2*gamma_n1)/(cmplx(-n,0)-omega_div_omega_ce)
+					end if
+					
+					gamma_n=bessel_gn_complex(n,x_d**2/2)
+					gamma_n1=bessel_gn_complex(n+1,x_d**2/2)
+					series_sum_1=series_sum_1+omega_pd_div_omega_cd/omega_div_omega_cd*((x_d**2-2*n+2*n**2/x_d**2)*gamma_n-x_d**2*gamma_n1)/(cmplx(n,0)-omega_div_omega_cd)
+					if(n>0) then
+					series_sum_1=series_sum_1+omega_pd_div_omega_cd/omega_div_omega_cd*((x_d**2-2*n+2*n**2/x_d**2)*gamma_n-x_d**2*gamma_n1)/(cmplx(-n,0)-omega_div_omega_cd)
+					end if
+				else
+					gamma_n=bessel_gn_complex(n,x**2/2)
+					gamma_n1=bessel_gn_complex(n+1,x**2/2)
+					x_pdf=(omega_div_omega_ci-cmplx(n,0))/k_para_rho_i_para
+					call pdf(x_pdf,y_pdf)
+					
+					series_sum_1=series_sum_1+omega_pi_div_omega_ci/omega_div_omega_ci*(gamma_n*(x**4-2*n*x**2+2*n**2)-x**4*gamma_n1)*(1/x**2/k_para_rho_i_para*y_pdf)
+					if(n>0) then
+						x_pdf=(omega_div_omega_ci+cmplx(n,0))/k_para_rho_i_para
+						call pdf(x_pdf,y_pdf)
+						series_sum_1=series_sum_1+omega_pi_div_omega_ci/omega_div_omega_ci*(gamma_n*(x**4-2*n*x**2+2*n**2)-x**4*gamma_n1)*(1/x**2/k_para_rho_i_para*y_pdf)
+					
+					end if
+
+					gamma_n=bessel_gn_complex(n,x_e**2/2)
+					gamma_n1=bessel_gn_complex(n+1,x_e**2/2)
+					x_pdf=(omega_div_omega_ce-cmplx(n,0))/k_para_rho_e_para
+					call pdf(x_pdf,y_pdf)
+				
+					series_sum_1=series_sum_1+omega_pe_div_omega_ce/omega_div_omega_ce*(gamma_n*(x_e**4-2*n*x_e**2+2*n**2)-x_e**4*gamma_n1)*(1/x_e**2/k_para_rho_e_para*y_pdf)
+					if(n>0) then
+						x_pdf=(omega_div_omega_ce+cmplx(n,0))/k_para_rho_e_para
+						call pdf(x_pdf,y_pdf)
+						series_sum_1=series_sum_1+omega_pe_div_omega_ce/omega_div_omega_ce*(gamma_n*(x_e**4-2*n*x_e**2+2*n**2)-x_e**4*gamma_n1)*(1/x_e**2/k_para_rho_e_para*y_pdf)
+					
+					end if
+					
+					gamma_n=bessel_gn_complex(n,x_d**2/2)
+					gamma_n1=bessel_gn_complex(n+1,x_d**2/2)
+					x_pdf=(omega_div_omega_cd-cmplx(n,0))/k_para_rho_d_para
+					call pdf(x_pdf,y_pdf)
+				
+					series_sum_1=series_sum_1+omega_pd_div_omega_cd/omega_div_omega_cd*(gamma_n*(x_d**4-2*n*x_d**2+2*n**2)-x_d**4*gamma_n1)*(1/x_d**2/k_para_rho_d_para*y_pdf)
+					if(n>0) then
+						x_pdf=(omega_div_omega_cd+cmplx(n,0))/k_para_rho_d_para
+						call pdf(x_pdf,y_pdf)
+						series_sum_1=series_sum_1+omega_pd_div_omega_cd/omega_div_omega_cd*(gamma_n*(x_d**4-2*n*x_d**2+2*n**2)-x_d**4*gamma_n1)*(1/x_d**2/k_para_rho_d_para*y_pdf)
+					
+					end if
+			   	end if
+			   
+				if(n>=10 .and. abs(series_sum_1-series_sum_2)<1e-8*abs(series_sum_1+series_sum_2) )then
+					exit
+				else if(n==50) then
+					write(*,*) 'The sum of the first 50 series does not converge'
+				end if
+				series_sum_2=series_sum_1
+			end do
+			if(abs(k_para_rho_i_para)<1e-6) then
+				D(2,2)=1-c_div_v_para*x**2/omega_div_omega_ci**2+series_sum_1
+			else
+				D(2,2)=1-c_div_v_para*(k_para_rho_i_para**2+x**2)/omega_div_omega_ci**2+series_sum_1
+			end if
+			
+			case(6)
+			series_sum_1=(0,0)
+			series_sum_2=(0,0)
+			if (abs(k_para_rho_i_para)<1e-6) then
+			  	D(2,3)=(0,0)
+			
+			else
+			  
+				do n=0,10
+					gamma_n=bessel_gn_complex(n,x**2/2)
+					gamma_n1=bessel_gn_complex(n+1,x**2/2)
+					x_pdf=(omega_div_omega_ci-cmplx(n,0))/k_para_rho_i_para
+					call pdf(x_pdf,y_pdf)
+						
+					series_sum_1=series_sum_1-cmplx(0,omega_pi_div_omega_ci,wp)/omega_div_omega_ci*x/k_para_rho_i_para*(x**2*(gamma_n1-gamma_n)+2*n*gamma_n)*(1/x**2)*(1+x_pdf*y_pdf)
+					if(n>0) then
+						x_pdf=(omega_div_omega_ci+cmplx(n,0))/k_para_rho_i_para
+						call pdf(x_pdf,y_pdf)
+						series_sum_1=series_sum_1-cmplx(0,omega_pi_div_omega_ci,wp)/omega_div_omega_ci*x/k_para_rho_i_para*(x**2*(gamma_n1-gamma_n)+2*n*gamma_n)*(1/x**2)*(1+x_pdf*y_pdf)
+					end if
+					gamma_n=bessel_gn_complex(n,x_e**2/2)
+					gamma_n1=bessel_gn_complex(n+1,x_e**2/2)
+					x_pdf=(omega_div_omega_ce-cmplx(n,0))/k_para_rho_e_para
+					call pdf(x_pdf,y_pdf)
+						
+					series_sum_1=series_sum_1-cmplx(0,omega_pe_div_omega_ce,wp)/omega_div_omega_ce*x_e/k_para_rho_e_para*(x_e**2*(gamma_n1-gamma_n)+2*n*gamma_n)*(1/x_e**2)*(1+x_pdf*y_pdf)
+					if(n>0) then
+						x_pdf=(omega_div_omega_ce+cmplx(n,0))/k_para_rho_e_para
+						call pdf(x_pdf,y_pdf)
+						series_sum_1=series_sum_1-cmplx(0,omega_pe_div_omega_ce,wp)/omega_div_omega_ce*x_e/k_para_rho_e_para*(x_e**2*(gamma_n1-gamma_n)+2*n*gamma_n)*(1/x_e**2)*(1+x_pdf*y_pdf)
+					
+					end if
+
+
+					gamma_n=bessel_gn_complex(n,x_d**2/2)
+					gamma_n1=bessel_gn_complex(n+1,x_d**2/2)
+					x_pdf=(omega_div_omega_cd-cmplx(n,0))/k_para_rho_d_para
+					call pdf(x_pdf,y_pdf)
+						
+					series_sum_1=series_sum_1-cmplx(0,omega_pd_div_omega_cd,wp)/omega_div_omega_cd*x_d/k_para_rho_d_para*(x_d**2*(gamma_n1-gamma_n)+2*n*gamma_n)*(1/x_d**2)*(1+x_pdf*y_pdf)
+					if(n>0) then
+						x_pdf=(omega_div_omega_cd+cmplx(n,0))/k_para_rho_d_para
+						call pdf(x_pdf,y_pdf)
+						series_sum_1=series_sum_1-cmplx(0,omega_pd_div_omega_cd,wp)/omega_div_omega_cd*x_d/k_para_rho_d_para*(x_d**2*(gamma_n1-gamma_n)+2*n*gamma_n)*(1/x_d**2)*(1+x_pdf*y_pdf)
+					
+					end if
+					if(n>=10 .and. abs(series_sum_1-series_sum_2)<1e-8*abs(series_sum_1+series_sum_2) )then
+						exit
+					else if(n==50) then
+						write(*,*) 'The sum of the first 50 series does not converge'
+					end if
+					series_sum_2=series_sum_1
+				end do
+			  	D(2,3)=series_sum_1
+			end if
+			case(7)
+				D(3,1)=D(1,3)
+			case(8)
+			   D(3,2)=-D(2,3)
+			case(9)
+				
+			series_sum_1=(0,0)
+			series_sum_2=(0,0)
+			do n=0,10
+			  
+				if (abs(k_para_rho_i_para)<1e-6) then
+					gamma_n=bessel_gn_complex(n,x**2/2)
+					series_sum_1=series_sum_1+omega_pi_div_omega_ci/omega_div_omega_ci*gamma_n/(cmplx(n,0)-omega_div_omega_ci)
+					
+					if (n>0) then
+						series_sum_1=series_sum_1+omega_pi_div_omega_ci/omega_div_omega_ci*gamma_n/(cmplx(-n,0)-omega_div_omega_ci)
+					end if
+					gamma_n=bessel_gn_complex(n,x_e**2/2)
+					series_sum_1=series_sum_1+omega_pe_div_omega_ce/omega_div_omega_ce*gamma_n/(cmplx(n,0)-omega_div_omega_ce)
+					
+					if (n>0) then
+						series_sum_1=series_sum_1+omega_pe_div_omega_ce/omega_div_omega_ce*gamma_n/(cmplx(-n,0)-omega_div_omega_ce)
+					end if
+
+					gamma_n=bessel_gn_complex(n,x_d**2/2)
+					series_sum_1=series_sum_1+omega_pd_div_omega_cd/omega_div_omega_cd*gamma_n/(cmplx(n,0)-omega_div_omega_cd)
+					
+					if (n>0) then
+						series_sum_1=series_sum_1+omega_pd_div_omega_cd/omega_div_omega_cd*gamma_n/(cmplx(-n,0)-omega_div_omega_cd)
+					end if
+				else
+					gamma_n=bessel_gn_complex(n,x**2/2)
+					x_pdf=(omega_div_omega_ci-cmplx(n,0))/k_para_rho_i_para
+					call pdf(x_pdf,y_pdf)
+					series_sum_1=series_sum_1+2*omega_pi_div_omega_ci*x**2/omega_div_omega_ci/k_para_rho_i_para*x_pdf*gamma_n*(1/x**2)*(1+x_pdf*y_pdf)
+					
+					if (n>0) then
+						x_pdf=(omega_div_omega_ci+cmplx(n,0))/k_para_rho_i_para
+						call pdf(x_pdf,y_pdf)
+						series_sum_1=series_sum_1+2*omega_pi_div_omega_ci*x**2/omega_div_omega_ci/k_para_rho_i_para*x_pdf*gamma_n*(1/x**2)*(1+x_pdf*y_pdf)
+					end if
+
+					gamma_n=bessel_gn_complex(n,x_e**2/2)
+					x_pdf=(omega_div_omega_ce-cmplx(n,0))/k_para_rho_e_para
+					call pdf(x_pdf,y_pdf)
+					series_sum_1=series_sum_1+2*omega_pe_div_omega_ce*x_e**2/omega_div_omega_ce/k_para_rho_e_para*x_pdf*gamma_n*(1/x_e**2)*(1+x_pdf*y_pdf)
+					
+					if (n>0) then
+						x_pdf=(omega_div_omega_ce+cmplx(n,0))/k_para_rho_e_para
+						call pdf(x_pdf,y_pdf)
+						series_sum_1=series_sum_1+2*omega_pe_div_omega_ce*x_e**2/omega_div_omega_ce/k_para_rho_e_para*x_pdf*gamma_n*(1/x_e**2)*(1+x_pdf*y_pdf)
+					end if
+
+					gamma_n=bessel_gn_complex(n,x_d**2/2)
+					x_pdf=(omega_div_omega_cd-cmplx(n,0))/k_para_rho_d_para
+					call pdf(x_pdf,y_pdf)
+					series_sum_1=series_sum_1+2*omega_pd_div_omega_cd*x_d**2/omega_div_omega_cd/k_para_rho_d_para*x_pdf*gamma_n*(1/x_d**2)*(1+x_pdf*y_pdf)
+					
+					if (n>0) then
+						x_pdf=(omega_div_omega_cd+cmplx(n,0))/k_para_rho_d_para
+						call pdf(x_pdf,y_pdf)
+						series_sum_1=series_sum_1+2*omega_pd_div_omega_cd*x_d**2/omega_div_omega_cd/k_para_rho_d_para*x_pdf*gamma_n*(1/x_d**2)*(1+x_pdf*y_pdf)
+					end if
+				end if
+				
+				if(n>=10 .and. abs(series_sum_1-series_sum_2)<1e-8*abs(series_sum_1+series_sum_2) )then
+					exit
+				else if(n==50) then
+					write(*,*) 'The sum of the first 50 series does not converge'
+				end if
+				series_sum_2=series_sum_1
+			end do
+			D(3,3)=1-x**2*c_div_v_para/omega_div_omega_ci**2+series_sum_1
+		end select
+			
+		end do
+		
+		end subroutine dispersion_function_matrix_variable_k_per_two_ion_species
     
 !-----------------------------------------------------------------------------!
 !     electron_dispersion_function_matrix_k_per:the dispersion relation for k_perp only considering electron 
@@ -2346,7 +2848,26 @@ contains
 	dispersion_function_variable_k_per=det(D,3)
   
     end function dispersion_function_variable_k_per 
-    
+
+!-----------------------------------------------------------------------------!
+!     dispersion_function_variable_k_per_two_ion_species: dispersion relation with k_perp as the variable for two ion species plasma
+!-----------------------------------------------------------------------------! 
+    complex(wp) function dispersion_function_variable_k_per_two_ion_species(x)
+	implicit none
+	complex(wp),intent(in)::x
+	complex(wp)::D(3,3)
+	integer::n,k
+	complex(wp)::y
+    y=x*omega_div_omega_ci/(c_div_v_para)**(0.5)
+	call dispersion_function_matrix_variable_k_per_two_ion_species(y,D)
+	do n=1,3
+	    do k=1,3
+		D(n,k)=D(n,k)
+	    end do
+	end do
+	dispersion_function_variable_k_per_two_ion_species=det(D,3)
+  
+    end function dispersion_function_variable_k_per_two_ion_species
 !-----------------------------------------------------------------------------!
 !     electron_dispersion_function_variable_k_per: dispersion relation only considering electron with k_perp as the variable
 !-----------------------------------------------------------------------------! 
@@ -2387,7 +2908,28 @@ contains
 	dispersion_function_parallel_variable_k_para=det(D,3)
   
     end function dispersion_function_parallel_variable_k_para   
-    
+
+	
+!-----------------------------------------------------------------------------!
+!     dispersion_function_parallel_variable_k_para_two:dispersion relation for parallel waves with k_para as the variable in two ion species plasma
+!-----------------------------------------------------------------------------! 
+    complex(wp) function dispersion_function_parallel_variable_k_para_two(x)
+	implicit none
+	complex(wp),intent(in)::x
+	complex(wp)::D(3,3)
+	integer::n,k
+    complex(wp)::y
+    y=x*omega_div_omega_ci/(c_div_v_para)**(0.5)
+    y=(1.0,1.0)*y/(2.0_wp)**(0.5)
+	call dispersion_function_parallel_matrix_variable_k_para_two(y,D)
+	do n=1,3
+	    do k=1,3
+		D(n,k)=D(n,k)
+	    end do
+	end do
+	dispersion_function_parallel_variable_k_para_two=det(D,3)
+  
+    end function dispersion_function_parallel_variable_k_para_two   
 !-----------------------------------------------------------------------------!
 !     cold_plasma_dispersion_function:dispersion relation for cold plasma with omega as the variable
 !-----------------------------------------------------------------------------! 
@@ -2640,7 +3182,8 @@ contains
 	complex(wp)::D(3,3),w(3),vl(3,3),vr(3,3)
 	integer::n,k,info,e_min
 	complex(wp)::y
-	call dispersion_function_two_ion_species_matrix(x,D)
+	y=x*omega_div_omega_ci/(c_div_v_para)**(0.5)
+	call dispersion_function_matrix_variable_k_per_two_ion_species(y,D)
     do n=1,3
 	  do k=1,3
 		  D(n,k)=D(n,k)/1000
@@ -2667,10 +3210,9 @@ contains
 	complex(wp)::D(3,3),w(3),vl(3,3),vr(3,3)
 	integer::n,k,info,e_min
 	complex(wp)::y
-    ! y=x*omega_div_omega_ci/(c_div_v_para)**(0.5)
-	! y=(1.0,1.0)*y/(2.0_wp)**(0.5)
-	y=x
-	call  dispersion_function_parallel_two_ion_species_matrix(y,D)
+    y=x*omega_div_omega_ci/(c_div_v_para)**(0.5)
+	y=(1.0,1.0)*y/(2.0_wp)**(0.5)
+	call  dispersion_function_parallel_matrix_variable_k_para_two(y,D)
    
     do n=1,3
 	  do k=1,3
